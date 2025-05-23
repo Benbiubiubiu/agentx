@@ -9,7 +9,7 @@ public enum ProductType {
     /** Chat */
     CHAT(0, "CHAT"),
     /** Agent */
-    AGENT(1, "IMAGE");
+    AGENT(1, "AGENT");
 
     private final Integer code;
     private final String description;
