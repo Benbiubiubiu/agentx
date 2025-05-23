@@ -1,12 +1,17 @@
 package org.xhy.interfaces.api.portal.billing;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.xhy.application.billing.BillingRecordApplicationService;
 import org.xhy.infrastructure.auth.UserContext;
 import org.xhy.interfaces.api.common.Result;
+import org.xhy.interfaces.dto.billing.PageResult;
 import org.xhy.interfaces.dto.billing.QueryRecordRequest;
+import org.xhy.interfaces.dto.billing.RecordListDTO;
+import org.xhy.interfaces.dto.billing.RecordQueryRequest;
 
 /**
  * XHY
@@ -17,16 +22,12 @@ import org.xhy.interfaces.dto.billing.QueryRecordRequest;
 @RestController
 @RequestMapping("/billing")
 public class BillingController {
-    /**
-     * 获取用户账单记录
-     * @return
-     */
-    @GetMapping("/page")
-    public Result<> getRecord(@RequestBody QueryRecordRequest request) {
-        String userId = UserContext.getCurrentUserId();
-        request.setUserId(userId);
+    @Autowired
+    private BillingRecordApplicationService billingRecordApplicationService;
 
-
-        return null;
+    @GetMapping("/query")
+    public Result<PageResult<RecordListDTO>> queryRecords(RecordQueryRequest request) {
+        PageResult<RecordListDTO> result = billingRecordApplicationService.queryRecords(request);
+        return Result.success(result);
     }
 }
