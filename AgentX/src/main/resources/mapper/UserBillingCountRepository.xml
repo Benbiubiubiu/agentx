@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.xhy.domain.billing.repository.UserBillingCountRepository">
+    
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, user_id, balance, cumulative_recharge_amount, last_transaction_at,
+        created_at, updated_at, deleted_at
+    </sql>
+
+    <!-- 根据用户ID查询账户余额 -->
+    <select id="findByUserId" resultType="org.xhy.domain.billing.entity.UserBillingCountEntity">
+        SELECT 
+        <include refid="Base_Column_List"/>
+        FROM user_billing_count
+        WHERE user_id = #{userId}
+        AND deleted_at IS NULL
+    </select>
+
+    <!-- 增加账户余额 -->
+    <update id="increaseBalance">
+        UPDATE user_billing_count
+        SET balance = balance + #{amount},
+            cumulative_recharge_amount = cumulative_recharge_amount + #{amount},
+            last_transaction_at = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = #{userId}
+        AND deleted_at IS NULL
+    </update>
+
+</mapper> 

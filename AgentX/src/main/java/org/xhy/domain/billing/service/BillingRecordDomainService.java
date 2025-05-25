@@ -4,6 +4,7 @@ import org.xhy.domain.billing.entity.BillingUsageRecordEntity;
 
 import java.util.List;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 public interface BillingRecordDomainService {
     /**
@@ -18,11 +19,25 @@ public interface BillingRecordDomainService {
     /**
      * 查询总记录数
      * @param userId 用户ID
-     * @param productId 产品ID
-     * @param ruleVersionId 规则版本ID
-     * @param startTime 开始时间
-     * @param endTime 结束时间
      * @return 总记录数
      */
     long countRecords(String userId);
+
+    /**
+     * 创建账单记录
+     * @param userId 用户ID
+     * @param productId 产品ID
+     * @param ruleVersionId 规则版本ID
+     * @param priceRule 价格规则
+     * @param totalAmount 总金额
+     * @param amountLeft 剩余金额
+     * @return 创建的账单记录
+     */
+    BillingUsageRecordEntity createRecord(
+                                          String userId,
+                                          String productId,
+                                          String ruleVersionId,
+                                          String priceRule,
+                                          BigDecimal totalAmount,
+                                          BigDecimal amountLeft);
 } 

@@ -45,7 +45,6 @@ public class BillingRecordApplicationService {
         dto.setRuleVersionId(record.getRuleVersionId());
         dto.setPriceRule(record.getPrice_rule());
         dto.setTotalAmount(record.getTotalAmount());
-        dto.setTotalToken(record.getTotalToken());
         dto.setAmountLeft(record.getAmountLeft());
         dto.setCreateTime(record.getCreatedAt());
         return dto;
