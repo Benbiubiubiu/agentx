@@ -10,7 +10,6 @@ public class RecordListDTO {
     private String ruleVersionId;
     private String priceRule;
     private BigDecimal totalAmount;
-    private BigDecimal totalToken;
     private BigDecimal amountLeft;
     private LocalDateTime createTime;
 
@@ -63,13 +62,6 @@ public class RecordListDTO {
         this.totalAmount = totalAmount;
     }
 
-    public BigDecimal getTotalToken() {
-        return totalToken;
-    }
-
-    public void setTotalToken(BigDecimal totalToken) {
-        this.totalToken = totalToken;
-    }
 
     public BigDecimal getAmountLeft() {
         return amountLeft;

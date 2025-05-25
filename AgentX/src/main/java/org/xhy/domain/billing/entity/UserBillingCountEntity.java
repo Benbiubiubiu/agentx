@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  */
 @TableName("user_billing_count")
 public class UserBillingCountEntity extends BaseEntity {
-    @TableId(type = IdType.ASSIGN_UUID)
+    @TableId(value = "id", type = IdType.ASSIGN_UUID)
     private String id;
     @TableField("user_id")
     private String userId;

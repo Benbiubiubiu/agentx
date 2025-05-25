@@ -16,7 +16,7 @@ import java.math.BigDecimal;
  **/
 @TableName("billing_usage_record")
 public class BillingUsageRecordEntity extends BaseEntity {
-    @TableId(type = IdType.ASSIGN_UUID)
+    @TableId(value = "id", type = IdType.ASSIGN_UUID)
     private String id;
 
     @TableField("user_id")
@@ -34,8 +34,6 @@ public class BillingUsageRecordEntity extends BaseEntity {
     @TableField("total_amount")
     private BigDecimal totalAmount;
 
-    @TableField("total_token")
-    private BigDecimal totalToken;
     @TableField("amount_left")
     private BigDecimal amountLeft;
 
@@ -87,13 +85,6 @@ public class BillingUsageRecordEntity extends BaseEntity {
         this.totalAmount = totalAmount;
     }
 
-    public BigDecimal getTotalToken() {
-        return totalToken;
-    }
-
-    public void setTotalToken(BigDecimal totalToken) {
-        this.totalToken = totalToken;
-    }
 
     public BigDecimal getAmountLeft() {
         return amountLeft;
