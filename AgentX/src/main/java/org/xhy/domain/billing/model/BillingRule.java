@@ -1,0 +1,36 @@
+package org.xhy.domain.billing.model;
+
+/**
+ * 计费规则模型
+ */
+public class BillingRule extends BaseRule {
+    /**
+     * 输入token单价（每1000个token）
+     */
+    private Double inputToken;
+
+    /**
+     * 输出token单价（每1000个token）
+     */
+    private Double outputToken;
+
+    public BillingRule() {
+        setType("BILLING");
+    }
+
+    public Double getInputToken() {
+        return inputToken;
+    }
+
+    public void setInputToken(Double inputToken) {
+        this.inputToken = inputToken;
+    }
+
+    public Double getOutputToken() {
+        return outputToken;
+    }
+
+    public void setOutputToken(Double outputToken) {
+        this.outputToken = outputToken;
+    }
+} 
