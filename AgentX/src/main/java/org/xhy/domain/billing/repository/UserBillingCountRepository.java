@@ -1,10 +1,13 @@
 package org.xhy.domain.billing.repository;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import org.xhy.domain.billing.entity.UserBillingCountEntity;
 import org.xhy.infrastructure.repository.MyBatisPlusExtRepository;
+
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
  * XHY
@@ -20,7 +23,11 @@ public interface UserBillingCountRepository extends MyBatisPlusExtRepository<Use
      * @param userId 用户ID
      * @return 用户账单统计实体
      */
-    UserBillingCountEntity findByUserId(String userId);
+    default UserBillingCountEntity findByUserId(String userId) {
+        LambdaQueryWrapper<UserBillingCountEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(UserBillingCountEntity::getUserId, userId);
+        return selectOne(wrapper);
+    }
 
     /**
      * 增加账户余额
@@ -28,5 +35,13 @@ public interface UserBillingCountRepository extends MyBatisPlusExtRepository<Use
      * @param amount 增加金额
      * @return 影响的行数
      */
-    int increaseBalance(@Param("userId") String userId, @Param("amount") BigDecimal amount);
+    default int increaseBalance(String userId, BigDecimal amount) {
+        LambdaUpdateWrapper<UserBillingCountEntity> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(UserBillingCountEntity::getUserId, userId)
+               .setSql("balance = balance + " + amount)
+               .setSql("cumulative_recharge_amount = cumulative_recharge_amount + " + amount)
+               .set(UserBillingCountEntity::getLastTransactionAt, LocalDateTime.now())
+               .set(UserBillingCountEntity::getUpdatedAt, LocalDateTime.now());
+        return update(null, wrapper);
+    }
 }

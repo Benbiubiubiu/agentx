@@ -1,8 +1,9 @@
 package org.xhy.domain.billing.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.xhy.domain.billing.entity.BillingUsageRecordEntity;
 import org.xhy.domain.billing.repository.BillingRecordRepository;
 import org.xhy.domain.billing.service.BillingRecordDomainService;
@@ -17,10 +18,13 @@ public class BillingRecordDomainServiceImpl implements BillingRecordDomainServic
     private BillingRecordRepository billingRecordRepository;
 
     @Override
-    public List<BillingUsageRecordEntity> queryRecords(String userId,int pageNum, int pageSize) {
-        return billingRecordRepository.queryRecords(userId, pageNum, pageSize);
+    public List<BillingUsageRecordEntity> queryRecords(String userId, int pageNum, int pageSize) {
+        Page<BillingUsageRecordEntity> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<BillingUsageRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(BillingUsageRecordEntity::getUserId, userId);
+        Page<BillingUsageRecordEntity> result = billingRecordRepository.selectPage(page, queryWrapper);
+        return result.getRecords();
     }
-
     @Override
     public long countRecords(String userId) {
         return billingRecordRepository.countRecords(userId);

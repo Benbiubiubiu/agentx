@@ -3,12 +3,13 @@ package org.xhy.interfaces.api.portal.billing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.xhy.application.billing.BillingRecordApplicationService;
+import org.xhy.domain.billing.entity.ProductEntity;
 import org.xhy.domain.billing.entity.UserBillingCountEntity;
+import org.xhy.domain.billing.service.ProductService;
+import org.xhy.domain.billing.service.RuleService;
 import org.xhy.domain.billing.service.UserBillingCountService;
 import org.xhy.interfaces.api.common.Result;
-import org.xhy.interfaces.dto.billing.PageResult;
-import org.xhy.interfaces.dto.billing.RecordListDTO;
-import org.xhy.interfaces.dto.billing.RecordQueryRequest;
+import org.xhy.interfaces.dto.billing.*;
 import org.xhy.infrastructure.auth.UserContext;
 
 import java.util.HashMap;
@@ -29,6 +30,18 @@ public class BillingController {
     @Autowired
     private UserBillingCountService userBillingCountService;
 
+    @Autowired
+    private ProductService productService;
+
+    @Autowired
+    private RuleService ruleService;
+
+    /**
+     * 查询用户账单记录列表
+     * @param request
+     * @return
+     */
+
     @GetMapping("/query")
     public Result<PageResult<RecordListDTO>> queryRecords(RecordQueryRequest request) {
         request.setUserId(UserContext.getCurrentUserId());
@@ -36,6 +49,10 @@ public class BillingController {
         return Result.success(result);
     }
 
+    /**
+     * 查询用户余额信息
+     * @return
+     */
     @GetMapping("/balance")
     public Result<Map<String, Object>> queryBalance() {
         String userId = UserContext.getCurrentUserId();
@@ -49,5 +66,27 @@ public class BillingController {
         }
         
         return Result.success(data);
+    }
+
+    /**
+     * 创建新产品
+     * @param request 创建产品请求
+     * @return 创建结果
+     */
+    @PostMapping("/create_product")
+    public Result createProduct(@RequestBody CreateProductRequest request) {
+        productService.createProduct(request);
+        return Result.success();
+    }
+
+    /**
+     * 创建新规则
+     * @param request
+     * @return
+     */
+    @PostMapping("/create_rule")
+    public Result createRule(@RequestBody CreateRuleRequest request) {
+        ruleService.createRule(request);
+        return Result.success();
     }
 }
