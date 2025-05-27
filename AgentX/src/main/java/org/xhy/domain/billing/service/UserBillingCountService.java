@@ -1,16 +1,27 @@
 package org.xhy.domain.billing.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.xhy.domain.billing.entity.UserBillingCountEntity;
-import java.math.BigDecimal;
+import org.xhy.domain.billing.repository.UserBillingCountRepository;
 
-public interface UserBillingCountService {
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Service
+public class UserBillingCountService {
     
+    @Autowired
+    private UserBillingCountRepository billingCountRepository;
+
     /**
      * 查询用户账户余额
      * @param userId 用户ID
      * @return 用户账单统计实体
      */
-    UserBillingCountEntity queryBalance(String userId);
+    public UserBillingCountEntity queryBalance(String userId) {
+        return billingCountRepository.findByUserId(userId);
+    }
 
     /**
      * 增加账户余额
@@ -18,5 +29,21 @@ public interface UserBillingCountService {
      * @param amount 增加金额
      * @return 更新后的用户账单统计实体
      */
-    UserBillingCountEntity increaseBalance(String userId, BigDecimal amount);
+    public UserBillingCountEntity increaseBalance(String userId, BigDecimal amount) {
+        UserBillingCountEntity entity = queryBalance(userId);
+        if (entity == null) {
+            entity = new UserBillingCountEntity();
+            entity.setUserId(userId);
+            entity.setBalance(amount);
+            entity.setCumulativeRechargeAmount(amount);
+            entity.setLastTransactionAt(LocalDateTime.now());
+            billingCountRepository.insert(entity);
+        } else {
+            entity.setBalance(entity.getBalance().add(amount));
+            entity.setCumulativeRechargeAmount(entity.getCumulativeRechargeAmount().add(amount));
+            entity.setLastTransactionAt(LocalDateTime.now());
+            billingCountRepository.updateById(entity);
+        }
+        return entity;
+    }
 } 
