@@ -28,8 +28,9 @@ public class BillingUsageRecordEntity extends BaseEntity {
     @TableField("rule_version_id")
     private String ruleVersionId;
 
+    /** 价格规则 */
     @TableField("price_rule")
-    private String price_rule;
+    private String priceRule;
 
     @TableField("total_amount")
     private BigDecimal totalAmount;
@@ -69,12 +70,12 @@ public class BillingUsageRecordEntity extends BaseEntity {
         this.ruleVersionId = ruleVersionId;
     }
 
-    public String getPrice_rule() {
-        return price_rule;
+    public String getPriceRule() {
+        return priceRule;
     }
 
-    public void setPrice_rule(String price_rule) {
-        this.price_rule = price_rule;
+    public void setPriceRule(String priceRule) {
+        this.priceRule = priceRule;
     }
 
     public BigDecimal getTotalAmount() {

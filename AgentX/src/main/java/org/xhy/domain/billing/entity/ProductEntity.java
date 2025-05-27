@@ -6,8 +6,11 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import org.xhy.infrastructure.entity.BaseEntity;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 /**
- * 产品实体类
+ * 产品实体
  */
 @TableName("product")
 public class ProductEntity extends BaseEntity {
