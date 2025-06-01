@@ -72,3 +72,13 @@ oauth:
     client-id: ${GITHUB_CLIENT_ID}
     client-secret: ${GITHUB_CLIENT_SECRET}
     redirect-uri: ${GITHUB_REDIRECT_URI:https://xxx/oauth/github/callback}
+
+github:
+  target:
+    username: ${GITHUB_TARGET_USERNAME:lucky-aeon}
+    repo-name: ${GITHUB_TARGET_REPO_NAME:agent-mcp-community}
+    token: ${GITHUB_TARGET_TOKEN:}
+mcp:
+  gateway:
+    api-key: 123456
+    base-url: http://localhost:8005

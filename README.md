@@ -1,43 +1,147 @@
+ 
+
 # AgentX - 智能对话系统平台
 
-AgentX 是一个 agent 平台，通过大模型 + MCP 方式来打造属于你的 agent，这里没有复杂的流程节点！没有复杂的拖拉拽！你只需要添加工具！你只需要使用自然语言！你就能打造属于你的 agent！
+[](https://opensource.org/licenses/MIT)
 
-## 项目启动
-### 前端启动
+AgentX 是一个基于大模型 (LLM) 和多能力平台 (MCP) 的智能 Agent 构建平台。它致力于简化 Agent 的创建流程，让用户无需复杂的流程节点或拖拽操作，仅通过自然语言和工具集成即可打造个性化的智能 Agent。
 
+
+## ⏳ 功能
+ - [x] Agent 管理（创建/发布）
+ - [x] LLM 上下文管理（滑动窗口，摘要算法）
+ - [x] Agent 策略（MCP）
+ - [x] 用户
+ - [x] 工具市场
+ - [x] MCP Server Community
+ - [x] MCP Gateway
+ - [x] 预先设置工具
+ - [x] Agent 定时任务
+ - [ ] Agent OpenAPI
+ - [ ] 模型高可用组件
+ - [ ] RAG
+ - [ ] 计费
+ - [ ] Multi Agent
+ - [ ] Agent 监控
+
+## 🚀 如何安装启动
+
+### 🛠️ 环境准备
+
+  * **Node.js & npm**: 推荐使用 LTS 版本。
+  * **Java Development Kit (JDK)**: JDK 17 或更高版本。
+  * **Docker & Docker Compose**: 用于部署数据库和其他依赖服务。
+
+### 💻 本地启动
+
+#### 1\. 克隆仓库
+
+```bash
+git clone https://github.com/your-username/AgentX.git # 替换为实际的仓库地址
+cd AgentX
+```
+
+#### 2\. 启动数据库 (PostgreSQL)
+
+进入 `script` 目录，并执行启动脚本。此脚本将使用 Docker Compose 启动一个 PostgreSQL 容器并初始化数据库。
+
+```bash
+cd script
+chmod +x setup_with_compose.sh
+./setup_with_compose.sh
+```
+
+成功启动后，您将看到 PostgreSQL 的连接信息：
+
+```
+🎉 PostgreSQL 容器已成功启动！
+容器名称: agentx-postgres
+连接信息:
+  主机: localhost
+  端口: 5432
+  用户: postgres
+  密码: postgres
+  数据库: agentx
+  连接URL: jdbc:postgresql://localhost:5432/agentx
+
+你可以使用以下命令连接到数据库:
+  docker exec -it agentx-postgres psql -U postgres -d agentx
+
+✅ 数据库初始化完成！
+```
+
+#### 3\. 启动后端服务 (AgentX Java Application)
+
+返回项目根目录，进入 `AgentX` 目录，并使用 Maven 或 Gradle（如果使用）构建并运行后端服务。
+
+```bash
+cd ../AgentX
+# 如果是Maven项目，通常是
+./mvnw clean install
+./mvnw spring-boot:run
+# 或者根据实际的jar包路径运行
+# java -jar target/AgentX-0.0.1-SNAPSHOT.jar # 替换为实际的jar包名称
+```
+
+后端服务启动后，通常会监听 `8080` 端口。
+
+#### 4\. 启动前端服务 (AgentX-Frontend-Plus)
+
+返回项目根目录，进入 `agentx-frontend-plus` 目录，安装依赖并启动前端服务。
+
+```bash
+cd ../agentx-frontend-plus
 npm install --legacy-peer-deps
+npm run dev
+```
 
-## 项目结构
+前端服务启动后，通常会监听 `3000` 端口。
 
-项目采用DDD（领域驱动设计）架构，主要包含以下几个层次：
+### ⚙️ 常用 Docker Compose 命令
 
-- **接口层(Interfaces)**: 负责与外部系统交互，包括API接口、前端界面等
-- **应用层(Application)**: 负责业务流程编排，调用领域服务完成业务逻辑
-- **领域层(Domain)**: 包含核心业务逻辑和领域模型
-- **基础设施层(Infrastructure)**: 提供技术支持，如数据持久化、外部服务等
+在 `script` 目录下：
 
-## 技术栈
+  * **启动所有服务**: `./setup_with_compose.sh` (首次运行或需要重新初始化数据库时推荐)
+  * **启动/重启服务 (不初始化数据库)**: `docker-compose up -d`
+  * **停止所有服务**: `docker-compose down`
+  * **查看服务状态**: `docker ps`
+  * **查看数据库日志**: `docker logs agentx-postgres`
 
-- **后端**: Java 17+, Spring Boot 3.x
-- **数据库**: PostgreSQL 14.x + pgvector
-- **容器化**: Docker & Docker Compose
+## 功能介绍
 
-## 开发环境搭建
+### Agent 管理
 
-### 前置条件
+用户可自行通过 LLM + “插件” 打造 Agent，插件指的是：工具，知识库等，一切为 LLM 服务都叫做 “插件”
 
-- JDK 17+
-- Maven 3.6+
-- Docker & Docker Compose
-- PostgreSQL 14+ (可选，也可使用Docker启动)
+用户打造的 Agent 可以发布给 TA 人使用
 
-## 功能模块
+在使用 Agent 的时候，模型的选择是使用者所决定
 
-- **基础对话功能**: 流式对话、会话管理、上下文管理
-- **服务商管理**: 多模型服务商接入、服务商配置管理
-- **知识库功能**: 文档管理、向量存储、RAG检索增强
-- **MCP**: 对接 MCP Server 完成工具的调用
-- **用户系统与计费**: 用户认证、计费系统、使用统计
-- **市场功能**: 插件市场、工具市场、知识库市场
-- **API与集成**: 对外API、SDK、外部系统集成
-- **定时任务**: 自动化 agent
+### Token 上下文管理
+
+虽然使用了 langchain4j 提供了内置的 Token 上下文处理，但是在系统中也提供了基于 Token 的滑动窗口以及 摘要算法
+
+### Agent 策略
+
+Agent = LLM + 工具
+
+在项目中使用了 LLM + MCP 的方式实现 Agent，通过 langchan4j 提供 MCP 实现
+
+在未来，会经过自测调研的方式自研 Agent 策略
+
+### 用户
+
+提供 github、Emial 的方式进行注册登录
+
+### 工具市场
+
+用户可自行上传工具，也可以使用官方的工具，工具给 Agent 进行使用
+
+### MCP Server Commmunity
+
+用户上传的工具在通过 `人工审核` 通过后会同步到 https://github.com/lucky-aeon/agent-mcp-community 中
+
+### MCP Gateway
+
+采用自研的 MCP 网关来统一管理所有的 MCP Server：https://github.com/lucky-aeon/mcp-gateway
+

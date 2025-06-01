@@ -4,11 +4,18 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import dev.langchain4j.service.output.ServiceOutputParser;
 import org.springframework.stereotype.Service;
+import org.xhy.domain.tool.model.ToolEntity;
+import org.xhy.domain.tool.repository.ToolRepository;
 import org.xhy.domain.user.model.UserEntity;
+import org.xhy.domain.user.model.UserSettingsEntity;
 import org.xhy.domain.user.repository.UserRepository;
+import org.xhy.domain.user.repository.UserSettingsRepository;
 import org.xhy.infrastructure.exception.BusinessException;
 import org.xhy.infrastructure.utils.PasswordUtils;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -16,8 +23,12 @@ public class UserDomainService {
 
     private final UserRepository userRepository;
 
-    public UserDomainService(UserRepository userRepository) {
+    private final UserSettingsRepository settingsRepository;
+
+    public UserDomainService(UserRepository userRepository, UserSettingsRepository settingsRepository) {
         this.userRepository = userRepository;
+
+        this.settingsRepository = settingsRepository;
     }
 
     /** 获取用户信息 */
@@ -34,13 +45,13 @@ public class UserDomainService {
 
         return userRepository.selectOne(wrapper);
     }
-    
+
     /** 根据GitHub ID查找用户
      * @param githubId GitHub ID
      * @return 用户实体，如果不存在则返回null */
     public UserEntity findUserByGithubId(String githubId) {
-        LambdaQueryWrapper<UserEntity> wrapper = Wrappers.<UserEntity>lambdaQuery()
-                .eq(UserEntity::getGithubId, githubId);
+        LambdaQueryWrapper<UserEntity> wrapper = Wrappers.<UserEntity>lambdaQuery().eq(UserEntity::getGithubId,
+                githubId);
         return userRepository.selectOne(wrapper);
     }
 
@@ -51,15 +62,18 @@ public class UserDomainService {
         userEntity.setPhone(phone);
         userEntity.setPassword(PasswordUtils.encode(password));
         userEntity.valid();
-        checkAccountExist(userEntity.getEmail(), userEntity.getPhone());
+        checkAccountExist(userEntity.getEmail());
 
         // 生成昵称
         String nickname = generateNickname();
         userEntity.setNickname(nickname);
         userRepository.checkInsert(userEntity);
+        UserSettingsEntity userSettingsEntity = new UserSettingsEntity();
+        userSettingsEntity.setUserId(userEntity.getId());
+        settingsRepository.insert(userSettingsEntity);
         return userEntity;
     }
-    
+
     /** 加密密码
      * @param password 原始密码
      * @return 加密后的密码 */
@@ -80,11 +94,10 @@ public class UserDomainService {
     }
 
     /** 检查账号是否存在，邮箱 or 手机号任意值
-     * @param email 邮箱账号
-     * @param phone 手机号账号 */
-    public void checkAccountExist(String email, String phone) {
-        LambdaQueryWrapper<UserEntity> wrapper = Wrappers.<UserEntity>lambdaQuery().eq(UserEntity::getEmail, email).or()
-                .eq(UserEntity::getPhone, phone);
+     * @param email 邮箱账号 */
+    public void checkAccountExist(String email) {
+        LambdaQueryWrapper<UserEntity> wrapper = Wrappers.<UserEntity>lambdaQuery().eq(UserEntity::getEmail, email)
+                .or();
         if (userRepository.exists(wrapper)) {
             throw new BusinessException("账号已存在,不可重复账注册");
         }
@@ -114,5 +127,12 @@ public class UserDomainService {
         user.setPassword(encodedPassword);
 
         userRepository.checkedUpdateById(user);
+    }
+
+    public List<UserEntity> getByIds(List<String> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return userRepository.selectByIds(userIds);
     }
 }

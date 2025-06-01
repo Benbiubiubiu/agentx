@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from "react"
-import { FileText, Send, ClipboardList, Wrench, CheckCircle, ListTodo, Circle, AlertCircle } from 'lucide-react'
+import { FileText, Send, ClipboardList, Wrench, CheckCircle, ListTodo, Circle, AlertCircle, Clock } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,11 +22,10 @@ import { nanoid } from 'nanoid'
 
 interface ChatPanelProps {
   conversationId: string
-  onToggleTaskHistory?: () => void
-  showTaskHistory?: boolean
   isFunctionalAgent?: boolean
   agentName?: string
   agentType?: number // 新增：助理类型，2表示功能性Agent
+  onToggleScheduledTaskPanel?: () => void // 新增：切换定时任务面板的回调
 }
 
 interface Message {
@@ -92,7 +91,7 @@ interface TaskDTO {
   endTime?: string    // 可选，任务结束时间
 }
 
-export function ChatPanel({ conversationId, onToggleTaskHistory, showTaskHistory = false, isFunctionalAgent = false, agentName = "AI助手", agentType = 1 }: ChatPanelProps) {
+export function ChatPanel({ conversationId, isFunctionalAgent = false, agentName = "AI助手", agentType = 1, onToggleScheduledTaskPanel }: ChatPanelProps) {
   const [input, setInput] = useState("")
   const [messages, setMessages] = useState<MessageInterface[]>([])
   const [isTyping, setIsTyping] = useState(false)
@@ -922,29 +921,40 @@ export function ChatPanel({ conversationId, onToggleTaskHistory, showTaskHistory
                         className={`${className} rounded p-2 my-2 overflow-x-auto max-w-full text-sm`}
                         style={{...style, wordBreak: 'break-all', overflowWrap: 'break-word'}}
                       >
-                        {tokens.map((line, i) => (
-                          <div key={i} {...getLineProps({ line, key: i })} style={{whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>
-                            <span className="text-gray-500 mr-2 text-right w-6 inline-block select-none">
-                              {i + 1}
-                            </span>
-                            {line.map((token, tokenIndex) => {
-                              // 获取token props但不包含key
-                              const tokenProps = getTokenProps({ token, key: tokenIndex });
-                              // 删除key属性
-                              const { key, ...restTokenProps } = tokenProps;
-                              // 单独传递key属性，并添加样式确保长字符串能换行
-                              return <span 
-                                key={tokenIndex} 
-                                {...restTokenProps} 
-                                style={{
-                                  ...restTokenProps.style,
-                                  wordBreak: 'break-all',
-                                  overflowWrap: 'break-word'
-                                }}
-                              />;
-                            })}
-                          </div>
-                        ))}
+                        {tokens.map((line, i) => {
+                          // 获取line props但不通过展开操作符传递key
+                          const lineProps = getLineProps({ line, key: i });
+                          return (
+                            <div 
+                              key={i} 
+                              className={lineProps.className}
+                              style={{
+                                ...lineProps.style,
+                                whiteSpace: 'pre-wrap', 
+                                wordBreak: 'break-all'
+                              }}
+                            >
+                              <span className="text-gray-500 mr-2 text-right w-6 inline-block select-none">
+                                {i + 1}
+                              </span>
+                              {line.map((token, tokenIndex) => {
+                                // 获取token props但不包含key
+                                const tokenProps = getTokenProps({ token, key: tokenIndex });
+                                // 删除key属性，使用单独的key属性
+                                return <span 
+                                  key={tokenIndex} 
+                                  className={tokenProps.className}
+                                  style={{
+                                    ...tokenProps.style,
+                                    wordBreak: 'break-all',
+                                    overflowWrap: 'break-word'
+                                  }}
+                                  children={tokenProps.children}
+                                />;
+                              })}
+                            </div>
+                          );
+                        })}
                       </pre>
                     </div>
                   )}
@@ -1198,9 +1208,9 @@ export function ChatPanel({ conversationId, onToggleTaskHistory, showTaskHistory
             variant="ghost"
             size="icon"
             className="h-8 w-8"
-            onClick={onToggleTaskHistory}
+            onClick={onToggleScheduledTaskPanel}
           >
-            <ClipboardList className={`h-5 w-5 ${showTaskHistory ? 'text-primary' : 'text-gray-500'}`} />
+            <Clock className={`h-5 w-5 text-gray-500 hover:text-primary`} />
           </Button>
         )}
       </div>
