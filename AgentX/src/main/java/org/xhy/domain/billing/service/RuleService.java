@@ -22,14 +22,18 @@ import java.util.List;
 @Service
 public class RuleService {
 
-    @Autowired
-    private RuleRepository ruleRepository;
+    private final RuleRepository ruleRepository;
+    private final RuleVersionRepository ruleVersionRepository;
+    private final ProductRepository productRepository;
 
-    @Autowired
-    private RuleVersionRepository ruleVersionRepository;
-    
-    @Autowired
-    private ProductRepository productRepository;
+    public RuleService(
+            RuleRepository ruleRepository,
+            RuleVersionRepository ruleVersionRepository,
+            ProductRepository productRepository) {
+        this.ruleRepository = ruleRepository;
+        this.ruleVersionRepository = ruleVersionRepository;
+        this.productRepository = productRepository;
+    }
 
     /**
      * 创建规则并关联到产品

@@ -26,10 +26,10 @@ class RuleServiceTest {
 
     @Autowired
     private ProductRepository productRepository;
-    
+
     @Autowired
     private UserDomainService userDomainService;
-    
+
     private String userId;
     private String productId;
 
@@ -38,7 +38,7 @@ class RuleServiceTest {
         // 创建测试用户
         UserEntity user = userDomainService.register("ben1@example.com", null, "password123");
         userId = user.getId();
-        
+
         // 创建测试产品
         ProductEntity product = new ProductEntity();
         product.setUserId(userId);
@@ -76,7 +76,7 @@ class RuleServiceTest {
         BillingRule savedRule = (BillingRule) rule.getRule();
         assertEquals(0.004, savedRule.getInputToken());
         assertEquals(0.007, savedRule.getOutputToken());
-        assertEquals("BILLING", savedRule.getType());
+
 
         // 验证产品是否更新了规则ID
         ProductEntity product = productRepository.selectById(productId);

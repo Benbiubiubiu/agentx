@@ -5,15 +5,21 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.apache.ibatis.type.JdbcType;
 import org.xhy.domain.billing.model.BaseRule;
+import org.xhy.domain.billing.model.BillingRule;
+import org.xhy.infrastructure.converter.BillingRuleConverter;
+import org.xhy.infrastructure.converter.ListConverter;
 import org.xhy.infrastructure.entity.BaseEntity;
+import org.xhy.infrastructure.typehandler.JsonTypeHandler;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 /**
  * 规则版本实体类
  */
-@TableName("rule_version")
+@TableName(value = "rule_version",autoResultMap = true)
 public class RuleVersionEntity extends BaseEntity {
     
     /** 版本ID */
@@ -33,8 +39,7 @@ public class RuleVersionEntity extends BaseEntity {
     private String version;
 
     /** 规则内容 */
-    @TableField(value = "rule", typeHandler = org.xhy.infrastructure.config.JsonbTypeHandler.class)
-    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@type")
+    @TableField(value = "rule", typeHandler = BillingRuleConverter.class, jdbcType = JdbcType.OTHER)
     private BaseRule rule;
 
     /** 生效时间 */

@@ -1,6 +1,5 @@
 package org.xhy.domain.billing.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.xhy.domain.billing.entity.UserBillingCountEntity;
 import org.xhy.domain.billing.repository.UserBillingCountRepository;
@@ -11,8 +10,11 @@ import java.time.LocalDateTime;
 @Service
 public class UserBillingCountService {
     
-    @Autowired
-    private UserBillingCountRepository billingCountRepository;
+    private final UserBillingCountRepository billingCountRepository;
+
+    public UserBillingCountService(UserBillingCountRepository billingCountRepository) {
+        this.billingCountRepository = billingCountRepository;
+    }
 
     /**
      * 查询用户账户余额

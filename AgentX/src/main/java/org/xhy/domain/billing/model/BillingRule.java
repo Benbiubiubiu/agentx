@@ -1,8 +1,11 @@
 package org.xhy.domain.billing.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * 计费规则模型
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class BillingRule extends BaseRule {
     /**
      * 输入token单价（每1000个token）
@@ -14,9 +17,6 @@ public class BillingRule extends BaseRule {
      */
     private Double outputToken;
 
-    public BillingRule() {
-        setType("BILLING");
-    }
 
     public Double getInputToken() {
         return inputToken;

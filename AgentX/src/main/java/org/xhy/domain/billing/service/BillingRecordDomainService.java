@@ -2,7 +2,6 @@ package org.xhy.domain.billing.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.xhy.domain.billing.entity.BillingUsageRecordEntity;
 import org.xhy.domain.billing.model.BaseRule;
@@ -11,8 +10,9 @@ import org.xhy.domain.billing.repository.BillingRecordRepository;
 import org.xhy.domain.billing.entity.RuleVersionEntity;
 import org.xhy.domain.billing.repository.RuleVersionRepository;
 import org.xhy.interfaces.dto.billing.PageRequest;
-import org.xhy.interfaces.dto.billing.RecordListDTO;
+import org.xhy.application.billing.dto.RecordListDTO;
 import org.xhy.interfaces.dto.billing.PageResult;
+import com.alibaba.fastjson.JSON;
 
 import java.util.List;
 import java.time.LocalDateTime;
@@ -26,11 +26,15 @@ import java.util.stream.Collectors;
 @Service
 public class BillingRecordDomainService {
     
-    @Autowired
-    private BillingRecordRepository billingRecordRepository;
+    private final BillingRecordRepository billingRecordRepository;
+    private final RuleVersionRepository ruleVersionRepository;
 
-    @Autowired
-    private RuleVersionRepository ruleVersionRepository;
+    public BillingRecordDomainService(
+            BillingRecordRepository billingRecordRepository,
+            RuleVersionRepository ruleVersionRepository) {
+        this.billingRecordRepository = billingRecordRepository;
+        this.ruleVersionRepository = ruleVersionRepository;
+    }
 
     /**
      * 查询账单记录
@@ -98,7 +102,7 @@ public class BillingRecordDomainService {
         if (ruleVersion == null) {
             throw new IllegalArgumentException("规则版本不存在");
         }
-
+        System.out.println("rule_version entity:"+JSON.toJSONString(ruleVersion));
         // 生成价格规则文本
         String priceRuleText = generatePriceRuleText(ruleVersion.getRule());
         
@@ -122,31 +126,37 @@ public class BillingRecordDomainService {
      * @return 价格规则文本
      */
     private String generatePriceRuleText(BaseRule rule) {
-        if (rule instanceof BillingRule) {
-            BillingRule billingRule = (BillingRule) rule;
-            StringBuilder text = new StringBuilder();
-            
-            // 输入token计费规则
-            if (billingRule.getInputToken() != null) {
-                text.append("输入token计费：")
-                    .append(billingRule.getInputToken().toString())
-                    .append("/1k");
-            }
-            
-            // 输出token计费规则
-            if (billingRule.getOutputToken() != null) {
-                if (text.length() > 0) {
-                    text.append("，");
-                }
-                text.append("输出token计费：")
-                    .append(billingRule.getOutputToken().toString())
-                    .append("/1k");
-            }
-            
-            return text.toString();
+        // 检查 rule 是否为 null
+        if (rule == null) {
+            return "未知计费规则";
+        }
+
+        // 检查是否为 BillingRule 类型
+        if (!(rule instanceof BillingRule)) {
+            return "未知计费规则";
+        }
+
+        BillingRule billingRule = (BillingRule) rule;
+        StringBuilder text = new StringBuilder();
+        
+        // 输入token计费规则
+        if (billingRule.getInputToken() != null) {
+            text.append("输入token计费：")
+                .append(billingRule.getInputToken().toString())
+                .append("/1k");
         }
         
-        return "未知计费规则";
+        // 输出token计费规则
+        if (billingRule.getOutputToken() != null) {
+            if (text.length() > 0) {
+                text.append("，");
+            }
+            text.append("输出token计费：")
+                .append(billingRule.getOutputToken().toString())
+                .append("/1k");
+        }
+        
+        return text.length() > 0 ? text.toString() : "未知计费规则";
     }
 
     /**

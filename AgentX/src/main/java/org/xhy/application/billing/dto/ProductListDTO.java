@@ -1,4 +1,4 @@
-package org.xhy.interfaces.dto.billing;
+package org.xhy.application.billing.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

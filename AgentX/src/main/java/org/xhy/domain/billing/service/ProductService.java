@@ -2,12 +2,11 @@ package org.xhy.domain.billing.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.xhy.domain.billing.entity.ProductEntity;
 import org.xhy.domain.billing.repository.ProductRepository;
 import org.xhy.interfaces.dto.billing.CreateProductRequest;
-import org.xhy.interfaces.dto.billing.ProductListDTO;
+import org.xhy.application.billing.dto.ProductListDTO;
 import org.xhy.interfaces.dto.billing.PageResult;
 
 import java.util.List;
@@ -15,25 +14,18 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
-    @Autowired
-    private ProductRepository productRepository;
     
+    private final ProductRepository productRepository;
+
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
+
     /**
      * 创建产品
-     * @param request 创建产品请求
+     * @param productEntity
      */
-    public void createProduct(CreateProductRequest request) {
-        ProductEntity productEntity = new ProductEntity();
-        productEntity.setProductName(request.getProductName());
-        productEntity.setProductType(request.getProductType());
-        productEntity.setDescription(request.getDescription());
-        productEntity.setIsEnabled(true);
-        productEntity.setUserId(request.getUserId());
-        // ruleId可以为空，后续可以更新
-        if (request.getRuleId() != null && !request.getRuleId().trim().isEmpty()) {
-            productEntity.setRuleId(request.getRuleId());
-        }
-        
+    public void createProduct(ProductEntity productEntity) {
         productRepository.insert(productEntity);
     }
 
@@ -68,18 +60,9 @@ public class ProductService {
 
     /**
      * 更新产品
-     * @param id 产品ID
-     * @param request 更新产品请求
+     * @param productEntity 产品实体
      */
-    public void updateProduct(String id, CreateProductRequest request) {
-        ProductEntity productEntity = new ProductEntity();
-        productEntity.setId(id);
-        productEntity.setProductName(request.getProductName());
-        productEntity.setProductType(request.getProductType());
-        productEntity.setDescription(request.getDescription());
-        if (request.getRuleId() != null && !request.getRuleId().trim().isEmpty()) {
-            productEntity.setRuleId(request.getRuleId());
-        }
+    public void updateProduct(ProductEntity productEntity) {
         productRepository.updateById(productEntity);
     }
 
@@ -89,7 +72,7 @@ public class ProductService {
      * @param size 每页大小
      * @return 产品列表分页结果
      */
-    public PageResult<ProductListDTO> queryProducts(int page, int size) {
+    public Page<ProductEntity> queryProducts(int page, int size) {
         // 创建分页对象
         Page<ProductEntity> pageParam = new Page<>(page, size);
         
@@ -99,14 +82,7 @@ public class ProductService {
                 .isNull("deleted_at");
         
         // 执行分页查询
-        Page<ProductEntity> result = productRepository.selectPage(pageParam, queryWrapper);
-        
-        // 转换为DTO
-        List<ProductListDTO> productList = result.getRecords().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-        
-        return new PageResult<>(productList, result.getTotal(), page, size);
+        return productRepository.selectPage(pageParam, queryWrapper);
     }
 
     /**
@@ -116,7 +92,7 @@ public class ProductService {
      * @param size 每页大小
      * @return 产品列表分页结果
      */
-    public PageResult<ProductListDTO> queryMyProducts(String userId, int page, int size) {
+    public Page<ProductEntity> queryMyProducts(String userId, int page, int size) {
         // 创建分页对象
         Page<ProductEntity> pageParam = new Page<>(page, size);
         
@@ -127,27 +103,6 @@ public class ProductService {
                 .isNull("deleted_at");
         
         // 执行分页查询
-        Page<ProductEntity> result = productRepository.selectPage(pageParam, queryWrapper);
-        
-        // 转换为DTO
-        List<ProductListDTO> productList = result.getRecords().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-        
-        return new PageResult<>(productList, result.getTotal(), page, size);
-    }
-
-    /**
-     * 将实体转换为DTO
-     */
-    private ProductListDTO convertToDTO(ProductEntity entity) {
-        ProductListDTO dto = new ProductListDTO();
-        dto.setId(entity.getId());
-        dto.setName(entity.getProductName());
-        dto.setDescription(entity.getDescription());
-        dto.setType(entity.getProductType());
-        dto.setCreatedAt(entity.getCreatedAt());
-        dto.setUpdatedAt(entity.getUpdatedAt());
-        return dto;
+        return productRepository.selectPage(pageParam, queryWrapper);
     }
 }

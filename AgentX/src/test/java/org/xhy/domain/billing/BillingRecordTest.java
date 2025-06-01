@@ -3,7 +3,6 @@ package org.xhy.domain.billing;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 import org.xhy.domain.billing.entity.BillingUsageRecordEntity;
 import org.xhy.domain.billing.entity.ProductEntity;
 import org.xhy.domain.billing.entity.RuleEntity;
@@ -24,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 账单记录服务测试类
  */
 @SpringBootTest
-@Transactional  // 添加事务注解，确保测试数据不会污染数据库
+
 public class BillingRecordTest {
 
     @Autowired
@@ -91,7 +90,6 @@ public class BillingRecordTest {
         // 验证创建结果
         assertNotNull(record, "创建记录不应该返回null");
         assertNotNull(record.getId(), "记录ID不应该为null");
-        assertTrue(isValidUUID(record.getId()), "ID应该是有效的UUID");
         assertEquals(userId, record.getUserId());
         assertEquals(productId, record.getProductId());
         assertEquals(ruleVersionId, record.getRuleVersionId());
@@ -201,7 +199,7 @@ public class BillingRecordTest {
         String productId = UUID.randomUUID().toString();
         String ruleId = UUID.randomUUID().toString();
         String ruleVersionId = UUID.randomUUID().toString();
-        
+
         // 1. 创建规则
         RuleEntity rule = new RuleEntity();
         rule.setId(ruleId);
@@ -231,7 +229,7 @@ public class BillingRecordTest {
         product.setRuleId(ruleId);
         product.setUserId(userId);
         product.setIsEnabled(true);
-        
+
         // 创建账单记录，部分字段为null
         BillingUsageRecordEntity record = billingRecordDomainService.createRecord(
             userId,

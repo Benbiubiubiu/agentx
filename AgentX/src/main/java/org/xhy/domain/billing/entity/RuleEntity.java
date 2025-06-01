@@ -6,12 +6,15 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.xhy.domain.billing.model.BaseRule;
+import org.xhy.domain.billing.model.BillingRule;
+import org.xhy.infrastructure.converter.BillingRuleConverter;
+import org.xhy.infrastructure.converter.ListConverter;
 import org.xhy.infrastructure.entity.BaseEntity;
 
 /**
  * 规则实体类
  */
-@TableName("rule")
+@TableName(value = "rule",autoResultMap = true)
 public class RuleEntity extends BaseEntity {
     
     /** 规则ID */
@@ -27,8 +30,7 @@ public class RuleEntity extends BaseEntity {
     private String description;
 
     /** 规则内容 */
-    @TableField(value = "rule", typeHandler = org.xhy.infrastructure.config.JsonbTypeHandler.class)
-    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@type")
+    @TableField(value = "rule", typeHandler = BillingRuleConverter.class)
     private BaseRule rule;
 
     public String getId() {

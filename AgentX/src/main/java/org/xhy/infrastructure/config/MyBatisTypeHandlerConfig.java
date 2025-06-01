@@ -13,6 +13,7 @@ import org.xhy.domain.llm.model.config.ProviderConfig;
 import org.xhy.domain.llm.model.enums.ModelType;
 import org.xhy.domain.task.constant.TaskStatus;
 import org.xhy.infrastructure.converter.*;
+import org.xhy.domain.billing.model.BillingRule;
 
 import jakarta.annotation.PostConstruct;
 import org.xhy.infrastructure.llm.protocol.enums.ProviderProtocol;
@@ -42,6 +43,7 @@ public class MyBatisTypeHandlerConfig {
         typeHandlerRegistry.register(Role.class, new RoleConverter());
         typeHandlerRegistry.register(MessageType.class, new MessageTypeConverter());
         typeHandlerRegistry.register(TaskStatus.class, new TaskStatusConverter());
+        typeHandlerRegistry.register(BillingRule.class, new BillingRuleConverter());
 
         log.info("手动注册类型处理器：ProviderConfigConverter");
 

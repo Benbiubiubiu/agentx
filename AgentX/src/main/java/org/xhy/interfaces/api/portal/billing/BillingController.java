@@ -3,19 +3,20 @@ package org.xhy.interfaces.api.portal.billing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.xhy.domain.billing.entity.ProductEntity;
-import org.xhy.domain.billing.entity.UserBillingCountEntity;
-import org.xhy.domain.billing.service.BillingRecordDomainService;
+import org.xhy.application.billing.dto.BillingRecordDTO;
+import org.xhy.application.billing.dto.ProductListDTO;
+import org.xhy.application.billing.service.BillingRecordAppService;
+import org.xhy.application.billing.service.ProductAppService;
 import org.xhy.domain.billing.service.ProductService;
 import org.xhy.domain.billing.service.RuleService;
 import org.xhy.domain.billing.service.UserBillingCountService;
 import org.xhy.interfaces.api.common.Result;
 import org.xhy.interfaces.dto.billing.*;
 import org.xhy.infrastructure.auth.UserContext;
+import org.xhy.application.billing.dto.BalanceDTO;
+import org.xhy.application.billing.service.UserBillingCountAppService;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 计费模块管理
@@ -24,17 +25,21 @@ import java.util.Map;
 @RequestMapping("/billing")
 public class BillingController {
 
-    @Autowired
-    private BillingRecordDomainService billingRecordApplicationService;
-    
-    @Autowired
-    private UserBillingCountService userBillingCountService;
+    private final BillingRecordAppService billingRecordAppService;
+    private final ProductAppService productAppService;
+    private final RuleService ruleService;
+    private final UserBillingCountAppService userBillingCountAppService;
 
-    @Autowired
-    private ProductService productService;
-
-    @Autowired
-    private RuleService ruleService;
+    public BillingController(
+            BillingRecordAppService billingRecordAppService,
+            ProductAppService productAppService,
+            RuleService ruleService,
+            UserBillingCountAppService userBillingCountAppService) {
+        this.billingRecordAppService = billingRecordAppService;
+        this.productAppService = productAppService;
+        this.ruleService = ruleService;
+        this.userBillingCountAppService = userBillingCountAppService;
+    }
 
     /**
      * 查询用户账单记录列表
@@ -42,29 +47,20 @@ public class BillingController {
      * @return 账单记录列表
      */
     @GetMapping("/query")
-    public Result<PageResult<RecordListDTO>> queryRecords(@Validated @RequestBody PageRequest request) {
-        String userId = UserContext.getCurrentUserId();
-        PageResult<RecordListDTO> result = billingRecordApplicationService.queryRecords(userId,request);
+    public Result<PageResult<BillingRecordDTO>> queryRecords(@Validated @RequestBody PageRequest request) {
+        PageResult<BillingRecordDTO> result = billingRecordAppService.queryRecords(request);
         return Result.success(result);
     }
 
     /**
-     * 查询用户余额信息
+     * 查询用户余额
      * @return 余额信息
      */
     @GetMapping("/balance")
-    public Result<Map<String, Object>> queryBalance() {
+    public Result<BalanceDTO> queryBalance() {
         String userId = UserContext.getCurrentUserId();
-        UserBillingCountEntity balance = userBillingCountService.queryBalance(userId);
-        
-        Map<String, Object> data = new HashMap<>();
-        if (balance != null) {
-            data.put("balance", balance.getBalance());
-            data.put("cumulativeRechargeAmount", balance.getCumulativeRechargeAmount());
-            data.put("lastTransactionAt", balance.getLastTransactionAt());
-        }
-        
-        return Result.success(data);
+        BalanceDTO balance = userBillingCountAppService.queryBalance(userId);
+        return Result.success(balance);
     }
 
     /**
@@ -74,7 +70,7 @@ public class BillingController {
      */
     @PostMapping("/create_product")
     public Result createProduct(@Validated @RequestBody CreateProductRequest request) {
-        productService.createProduct(request);
+        productAppService.createProduct(request);
         return Result.success();
     }
 
@@ -85,7 +81,7 @@ public class BillingController {
      */
     @GetMapping("/product_list")
     public Result<PageResult<ProductListDTO>> queryProducts(PageRequest pageRequest) {
-        PageResult<ProductListDTO> result = productService.queryProducts(pageRequest.getPage(), pageRequest.getSize());
+        PageResult<ProductListDTO> result = productAppService.queryProducts(pageRequest.getPage(), pageRequest.getSize());
         return Result.success(result);
     }
 
@@ -97,7 +93,7 @@ public class BillingController {
     @GetMapping("/product_list/my_products")
     public Result<PageResult<ProductListDTO>> queryMyProducts(PageRequest pageRequest) {
         String userId = UserContext.getCurrentUserId();
-        PageResult<ProductListDTO> result = productService.queryMyProducts(userId, pageRequest.getPage(), pageRequest.getSize());
+        PageResult<ProductListDTO> result = productAppService.queryMyProducts(userId, pageRequest.getPage(), pageRequest.getSize());
         return Result.success(result);
     }
 
@@ -120,7 +116,7 @@ public class BillingController {
      */
     @PutMapping("/product/{id}")
     public Result updateProduct(@PathVariable String id, @Validated @RequestBody CreateProductRequest request) {
-        productService.updateProduct(id, request);
+        productAppService.updateProduct(id, request);
         return Result.success();
     }
 
