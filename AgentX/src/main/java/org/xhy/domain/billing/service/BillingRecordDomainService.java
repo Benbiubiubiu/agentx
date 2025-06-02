@@ -9,15 +9,10 @@ import org.xhy.domain.billing.model.BillingRule;
 import org.xhy.domain.billing.repository.BillingRecordRepository;
 import org.xhy.domain.billing.entity.RuleVersionEntity;
 import org.xhy.domain.billing.repository.RuleVersionRepository;
-import org.xhy.interfaces.dto.billing.PageRequest;
-import org.xhy.application.billing.dto.RecordListDTO;
-import org.xhy.interfaces.dto.billing.PageResult;
 import com.alibaba.fastjson.JSON;
-
 import java.util.List;
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
-import java.util.stream.Collectors;
 
 /**
  * 账单记录领域服务

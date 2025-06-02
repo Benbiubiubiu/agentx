@@ -8,9 +8,6 @@ import org.xhy.domain.billing.entity.RuleEntity;
 import org.xhy.domain.billing.entity.RuleVersionEntity;
 import org.xhy.domain.billing.service.RuleService;
 import org.xhy.interfaces.dto.billing.CreateRuleRequest;
-import org.xhy.interfaces.dto.billing.PageRequest;
-import org.xhy.interfaces.dto.billing.PageResult;
-
 import java.util.List;
 
 /**
