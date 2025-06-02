@@ -1,16 +1,18 @@
 package org.xhy.application.billing.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.xhy.application.billing.assembler.BillingRecordAssembler;
 import org.xhy.application.billing.dto.BillingRecordDTO;
 import org.xhy.domain.billing.entity.BillingUsageRecordEntity;
 import org.xhy.domain.billing.service.BillingRecordDomainService;
 import org.xhy.infrastructure.auth.UserContext;
-import org.xhy.interfaces.dto.billing.PageRequest;
+import org.xhy.interfaces.dto.Page;
 import org.xhy.interfaces.dto.billing.PageResult;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 账单记录应用服务
@@ -32,16 +34,14 @@ public class BillingRecordAppService {
 
     /**
      * 查询账单记录
-     * @param request 分页请求
-     * @return 分页结果
      */
-    public PageResult<BillingRecordDTO> queryRecords(PageRequest request) {
+    @Transactional(readOnly = true)
+    public PageResult<BillingRecordDTO> queryRecords(Page page) {
         String userId = UserContext.getCurrentUserId();
-        // 调用领域服务查询数据
         List<BillingUsageRecordEntity> records = billingRecordDomainService.queryRecords(
             userId,
-            request.getPage(), 
-            request.getSize()
+            page.getPage(), 
+            page.getPageSize()
         );
         
         // 查询总数
@@ -50,7 +50,7 @@ public class BillingRecordAppService {
         // 转换为DTO
         List<BillingRecordDTO> dtoList = BillingRecordAssembler.toDTOs(records);
         
-        return new PageResult<>(dtoList, total, request.getPage(), request.getSize());
+        return new PageResult<>(dtoList, total, page.getPage(), page.getPageSize());
     }
 
     /**

@@ -36,23 +36,6 @@ public class BillingRecordDomainService {
         this.ruleVersionRepository = ruleVersionRepository;
     }
 
-    /**
-     * 查询账单记录
-     * @param userId 用户ID
-     * @param request 分页请求
-     * @return 分页结果
-     */
-    public PageResult<RecordListDTO> queryRecords(String userId, PageRequest request) {
-        // 查询数据
-        List<BillingUsageRecordEntity> records = queryRecords(userId, request.getPage(), request.getSize());
-        // 查询总数
-        long total = countRecords(userId);
-        // 转换为DTO
-        List<RecordListDTO> dtoList = records.stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
-        return new PageResult<>(dtoList, total, request.getPage(), request.getSize());
-    }
 
     /**
      * 分页查询用户的账单记录
@@ -159,19 +142,4 @@ public class BillingRecordDomainService {
         return text.length() > 0 ? text.toString() : "未知计费规则";
     }
 
-    /**
-     * 将实体转换为DTO
-     */
-    private RecordListDTO convertToDTO(BillingUsageRecordEntity record) {
-        RecordListDTO dto = new RecordListDTO();
-        dto.setId(record.getId());
-        dto.setUserId(record.getUserId());
-        dto.setProductId(record.getProductId());
-        dto.setRuleVersionId(record.getRuleVersionId());
-        dto.setPriceRule(record.getPriceRule());
-        dto.setTotalAmount(record.getTotalAmount());
-        dto.setAmountLeft(record.getAmountLeft());
-        dto.setCreateTime(record.getCreatedAt());
-        return dto;
-    }
 } 

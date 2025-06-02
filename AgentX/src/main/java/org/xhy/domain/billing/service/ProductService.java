@@ -68,41 +68,24 @@ public class ProductService {
 
     /**
      * 查询产品列表
-     * @param page 页码
-     * @param size 每页大小
-     * @return 产品列表分页结果
      */
-    public Page<ProductEntity> queryProducts(int page, int size) {
-        // 创建分页对象
-        Page<ProductEntity> pageParam = new Page<>(page, size);
-        
-        // 创建查询条件
+    public List<ProductEntity> queryProducts(int page, int size) {
         QueryWrapper<ProductEntity> queryWrapper = new QueryWrapper<ProductEntity>()
                 .eq("is_enabled", true)
-                .isNull("deleted_at");
-        
-        // 执行分页查询
-        return productRepository.selectPage(pageParam, queryWrapper);
+                .isNull("deleted_at")
+                .last("LIMIT " + size + " OFFSET " + (page - 1) * size);
+        return productRepository.selectList(queryWrapper);
     }
 
     /**
      * 查询我的产品列表
-     * @param userId 用户ID
-     * @param page 页码
-     * @param size 每页大小
-     * @return 产品列表分页结果
      */
-    public Page<ProductEntity> queryMyProducts(String userId, int page, int size) {
-        // 创建分页对象
-        Page<ProductEntity> pageParam = new Page<>(page, size);
-        
-        // 创建查询条件
+    public List<ProductEntity> queryMyProducts(String userId, int page, int size) {
         QueryWrapper<ProductEntity> queryWrapper = new QueryWrapper<ProductEntity>()
                 .eq("user_id", userId)
                 .eq("is_enabled", true)
-                .isNull("deleted_at");
-        
-        // 执行分页查询
-        return productRepository.selectPage(pageParam, queryWrapper);
+                .isNull("deleted_at")
+                .last("LIMIT " + size + " OFFSET " + (page - 1) * size);
+        return productRepository.selectList(queryWrapper);
     }
 }

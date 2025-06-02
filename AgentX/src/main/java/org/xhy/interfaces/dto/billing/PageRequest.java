@@ -1,7 +1,6 @@
 package org.xhy.interfaces.dto.billing;
 
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 
 /**
  * 分页请求参数
@@ -10,14 +9,12 @@ public class PageRequest {
     /**
      * 页码，从1开始
      */
-    @NotNull(message = "页码不能为空")
     @Min(value = 1, message = "页码必须大于0")
     private int page = 1;
 
     /**
      * 每页大小
      */
-    @NotNull(message = "每页大小不能为空")
     @Min(value = 1, message = "每页大小必须大于0")
     private int size = 10;
 

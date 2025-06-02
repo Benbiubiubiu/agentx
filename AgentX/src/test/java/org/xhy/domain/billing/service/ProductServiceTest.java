@@ -1,6 +1,5 @@
 package org.xhy.domain.billing.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,16 +125,14 @@ class ProductServiceTest {
     @Test
     void queryProducts_ShouldReturnPaginatedResults() {
         // 执行测试
-        Page<ProductEntity> result = productService.queryProducts(1, 3);
+        List<ProductEntity> result = productService.queryProducts(1, 3);
 
         // 验证结果
         assertNotNull(result);
-        assertEquals(1, result.getCurrent());
-        assertEquals(3, result.getSize());
-        assertEquals(3, result.getRecords().size()); // 第一页应该有3个产品
+        assertEquals(3, result.size()); // 第一页应该有3个产品
 
         // 验证实体
-        ProductEntity product1 = result.getRecords().get(0);
+        ProductEntity product1 = result.get(0);
         assertNotNull(product1.getId());
         assertEquals("聊天助手", product1.getProductName());
         assertEquals("CHAT", product1.getProductType());
@@ -145,17 +142,14 @@ class ProductServiceTest {
     @Test
     void queryMyProducts_ShouldReturnUserProducts() {
         // 执行测试
-        Page<ProductEntity> result = productService.queryMyProducts(userId, 1, 10);
+        List<ProductEntity> result = productService.queryMyProducts(userId, 1, 10);
 
         // 验证结果
         assertNotNull(result);
-        assertEquals(3, result.getTotal()); // 用户1有3个产品
-        assertEquals(1, result.getCurrent());
-        assertEquals(10, result.getSize());
-        assertEquals(3, result.getRecords().size());
+        assertEquals(3, result.size()); // 用户1有3个产品
 
         // 验证实体
-        ProductEntity product1 = result.getRecords().get(0);
+        ProductEntity product1 = result.get(0);
         assertNotNull(product1.getId());
         assertEquals("聊天助手", product1.getProductName());
         assertEquals("CHAT", product1.getProductType());
@@ -168,14 +162,11 @@ class ProductServiceTest {
         productRepository.delete(null);
 
         // 执行测试
-        Page<ProductEntity> result = productService.queryProducts(1, 10);
+        List<ProductEntity> result = productService.queryProducts(1, 10);
 
         // 验证结果
         assertNotNull(result);
-        assertEquals(0, result.getTotal());
-        assertEquals(1, result.getCurrent());
-        assertEquals(10, result.getSize());
-        assertTrue(result.getRecords().isEmpty());
+        assertTrue(result.isEmpty());
     }
 
     private ProductEntity createProductEntity(String name, String type, String description, String userId) {

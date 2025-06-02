@@ -15,6 +15,7 @@ import org.xhy.interfaces.dto.billing.*;
 import org.xhy.infrastructure.auth.UserContext;
 import org.xhy.application.billing.dto.BalanceDTO;
 import org.xhy.application.billing.service.UserBillingCountAppService;
+import org.xhy.interfaces.dto.Page;
 
 import java.time.LocalDateTime;
 
@@ -34,7 +35,8 @@ public class BillingController {
             BillingRecordAppService billingRecordAppService,
             ProductAppService productAppService,
             RuleService ruleService,
-            UserBillingCountAppService userBillingCountAppService) {
+            UserBillingCountAppService userBillingCountAppService
+    ) {
         this.billingRecordAppService = billingRecordAppService;
         this.productAppService = productAppService;
         this.ruleService = ruleService;
@@ -43,12 +45,12 @@ public class BillingController {
 
     /**
      * 查询用户账单记录列表
-     * @param request 查询请求
+     * @param page 查询请求
      * @return 账单记录列表
      */
     @GetMapping("/query")
-    public Result<PageResult<BillingRecordDTO>> queryRecords(@Validated @RequestBody PageRequest request) {
-        PageResult<BillingRecordDTO> result = billingRecordAppService.queryRecords(request);
+    public Result<PageResult<BillingRecordDTO>> queryRecords(@RequestBody Page page) {
+        PageResult<BillingRecordDTO> result = billingRecordAppService.queryRecords(page);
         return Result.success(result);
     }
 
@@ -76,24 +78,23 @@ public class BillingController {
 
     /**
      * 查询产品列表
-     * @param pageRequest 分页请求参数
+     * @param page 分页请求参数
      * @return 产品列表
      */
     @GetMapping("/product_list")
-    public Result<PageResult<ProductListDTO>> queryProducts(PageRequest pageRequest) {
-        PageResult<ProductListDTO> result = productAppService.queryProducts(pageRequest.getPage(), pageRequest.getSize());
+    public Result<PageResult<ProductListDTO>> queryProducts(@RequestBody Page page) {
+        PageResult<ProductListDTO> result = productAppService.queryProducts(page);
         return Result.success(result);
     }
 
     /**
      * 查询我的产品列表
-     * @param pageRequest 分页请求参数
+     * @param page 分页请求参数
      * @return 我的产品列表
      */
     @GetMapping("/product_list/my_products")
-    public Result<PageResult<ProductListDTO>> queryMyProducts(PageRequest pageRequest) {
-        String userId = UserContext.getCurrentUserId();
-        PageResult<ProductListDTO> result = productAppService.queryMyProducts(userId, pageRequest.getPage(), pageRequest.getSize());
+    public Result<PageResult<ProductListDTO>> queryMyProducts(@RequestBody Page page) {
+        PageResult<ProductListDTO> result = productAppService.queryMyProducts( page);
         return Result.success(result);
     }
 

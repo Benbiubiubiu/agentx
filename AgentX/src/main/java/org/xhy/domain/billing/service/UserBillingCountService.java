@@ -3,6 +3,7 @@ package org.xhy.domain.billing.service;
 import org.springframework.stereotype.Service;
 import org.xhy.domain.billing.entity.UserBillingCountEntity;
 import org.xhy.domain.billing.repository.UserBillingCountRepository;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,7 +23,9 @@ public class UserBillingCountService {
      * @return 用户账单统计实体
      */
     public UserBillingCountEntity queryBalance(String userId) {
-        return billingCountRepository.findByUserId(userId);
+        LambdaQueryWrapper<UserBillingCountEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(UserBillingCountEntity::getUserId, userId);
+        return billingCountRepository.selectOne(wrapper);
     }
 
     /**
