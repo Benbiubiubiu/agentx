@@ -1,0 +1,54 @@
+package org.xhy.domain.billing.service;
+
+import org.springframework.stereotype.Service;
+import org.xhy.domain.billing.entity.UserBillingCountEntity;
+import org.xhy.domain.billing.repository.UserBillingCountRepository;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Service
+public class UserBillingCountService {
+    
+    private final UserBillingCountRepository billingCountRepository;
+
+    public UserBillingCountService(UserBillingCountRepository billingCountRepository) {
+        this.billingCountRepository = billingCountRepository;
+    }
+
+    /**
+     * 查询用户账户余额
+     * @param userId 用户ID
+     * @return 用户账单统计实体
+     */
+    public UserBillingCountEntity queryBalance(String userId) {
+        LambdaQueryWrapper<UserBillingCountEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(UserBillingCountEntity::getUserId, userId);
+        return billingCountRepository.selectOne(wrapper);
+    }
+
+    /**
+     * 增加账户余额
+     * @param userId 用户ID
+     * @param amount 增加金额
+     * @return 更新后的用户账单统计实体
+     */
+    public UserBillingCountEntity increaseBalance(String userId, BigDecimal amount) {
+        UserBillingCountEntity entity = queryBalance(userId);
+        if (entity == null) {
+            entity = new UserBillingCountEntity();
+            entity.setUserId(userId);
+            entity.setBalance(amount);
+            entity.setCumulativeRechargeAmount(amount);
+            entity.setLastTransactionAt(LocalDateTime.now());
+            billingCountRepository.insert(entity);
+        } else {
+            entity.setBalance(entity.getBalance().add(amount));
+            entity.setCumulativeRechargeAmount(entity.getCumulativeRechargeAmount().add(amount));
+            entity.setLastTransactionAt(LocalDateTime.now());
+            billingCountRepository.updateById(entity);
+        }
+        return entity;
+    }
+} 
