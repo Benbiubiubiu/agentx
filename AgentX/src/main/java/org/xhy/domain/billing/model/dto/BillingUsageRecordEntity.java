@@ -1,4 +1,4 @@
-package org.xhy.domain.billing.entity;
+package org.xhy.domain.billing.model.dto;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -11,8 +11,7 @@ import java.math.BigDecimal;
 /**
  * XHY
  * 2025/5/17 22:24
- *
- * @author Ben，微信：wz_Fung_Ben，邮箱：842609063@qq.con <br/>
+ * 账单使用记录实体类
  **/
 @TableName("billing_usage_record")
 public class BillingUsageRecordEntity extends BaseEntity {

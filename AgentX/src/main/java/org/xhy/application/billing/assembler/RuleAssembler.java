@@ -1,7 +1,7 @@
 package org.xhy.application.billing.assembler;
 
 import org.xhy.application.billing.dto.RuleDTO;
-import org.xhy.domain.billing.entity.RuleEntity;
+import org.xhy.domain.billing.model.dto.RuleEntity;
 import org.xhy.interfaces.dto.billing.CreateRuleRequest;
 
 import java.time.LocalDateTime;

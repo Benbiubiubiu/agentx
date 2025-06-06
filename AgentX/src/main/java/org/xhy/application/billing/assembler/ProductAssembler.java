@@ -1,7 +1,7 @@
 package org.xhy.application.billing.assembler;
 
 import org.xhy.application.billing.dto.ProductListDTO;
-import org.xhy.domain.billing.entity.ProductEntity;
+import org.xhy.domain.billing.model.dto.ProductEntity;
 import org.xhy.interfaces.dto.billing.CreateProductRequest;
 
 /**
@@ -25,7 +25,7 @@ public class ProductAssembler {
         product.setProductType(request.getProductType());
         product.setDescription(request.getDescription());
         product.setUserId(request.getUserId());
-        product.setIsEnabled(true);
+        product.setEnabled(true);
         if (request.getRuleId() != null && !request.getRuleId().trim().isEmpty()) {
             product.setRuleId(request.getRuleId());
         }

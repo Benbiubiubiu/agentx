@@ -1,7 +1,7 @@
 package org.xhy.application.billing.assembler;
 
 import org.xhy.application.billing.dto.BalanceDTO;
-import org.xhy.domain.billing.entity.UserBillingCountEntity;
+import org.xhy.domain.billing.model.dto.UserBillingCountEntity;
 
 /**
  * 余额领域对象组装器

@@ -2,31 +2,29 @@ package org.xhy.domain.billing.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.xhy.domain.billing.constant.ProductType;
-import org.xhy.domain.billing.entity.RuleEntity;
-import org.xhy.domain.billing.entity.RuleVersionEntity;
-import org.xhy.domain.billing.entity.ProductEntity;
-import org.xhy.domain.billing.model.BaseRule;
-import org.xhy.domain.billing.model.BillingRule;
+import org.xhy.domain.billing.model.dto.RuleEntity;
+import org.xhy.domain.billing.model.dto.RuleVersionEntity;
+import org.xhy.domain.billing.model.dto.ProductEntity;
+import org.xhy.domain.billing.model.config.BaseRule;
+import org.xhy.domain.billing.model.config.BillingRule;
 import org.xhy.domain.billing.repository.RuleRepository;
 import org.xhy.domain.billing.repository.RuleVersionRepository;
 import org.xhy.domain.billing.repository.ProductRepository;
 import org.xhy.interfaces.dto.billing.CreateRuleRequest;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-public class RuleService {
+public class RuleDomainService {
 
     private final RuleRepository ruleRepository;
     private final RuleVersionRepository ruleVersionRepository;
     private final ProductRepository productRepository;
 
-    public RuleService(
+    public RuleDomainService(
             RuleRepository ruleRepository,
             RuleVersionRepository ruleVersionRepository,
             ProductRepository productRepository) {
@@ -40,7 +38,6 @@ public class RuleService {
      * @param request 创建规则请求
      * @return 创建的规则实体
      */
-    @Transactional
     public RuleEntity createRule(CreateRuleRequest request) {
         // 1. 获取产品信息
         ProductEntity product = productRepository.selectById(request.getProductId());
@@ -107,23 +104,10 @@ public class RuleService {
 
     /**
      * 创建规则版本
-     * @param ruleId 规则ID
-     * @param request 创建规则请求
-     * @param effectiveAt 生效时间
-     * @param expiredAt 过期时间
+     * @param versionEntity 规则版本实体
      * @return 创建的规则版本实体
      */
-    @Transactional
-    public RuleVersionEntity createRuleVersion(String ruleId, CreateRuleRequest request, 
-                                             LocalDateTime effectiveAt, LocalDateTime expiredAt) {
-        RuleVersionEntity versionEntity = new RuleVersionEntity();
-        versionEntity.setRuleId(ruleId);
-        versionEntity.setVersion(request.getVersion());
-        versionEntity.setDescription(request.getDescription());
-        versionEntity.setRule(request.getRule());
-        versionEntity.setEffectiveAt(effectiveAt);
-        versionEntity.setExpiredAt(expiredAt);
-        
+    public RuleVersionEntity createRuleVersion(RuleVersionEntity versionEntity) {
         ruleVersionRepository.insert(versionEntity);
         return versionEntity;
     }
@@ -177,9 +161,10 @@ public class RuleService {
     /**
      * 删除规则
      * @param id 规则ID
+     * @param productId 产品ID
      */
     @Transactional
-    public void deleteRule(String id) {
+    public void deleteRule(String id, String productId) {
         // 删除规则
         ruleRepository.deleteById(id);
         
@@ -187,26 +172,52 @@ public class RuleService {
         LambdaQueryWrapper<RuleVersionEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(RuleVersionEntity::getRuleId, id);
         ruleVersionRepository.delete(wrapper);
+
+        // 清除产品表中的规则ID
+        LambdaUpdateWrapper<ProductEntity> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(ProductEntity::getId, productId)
+                    .set(ProductEntity::getRuleId, null);
+        productRepository.update(null, updateWrapper);
     }
 
     /**
      * 更新规则
      * @param id 规则ID
-     * @param request 更新请求
-     * @return 更新后的规则实体
+     * @param ruleEntity 规则实体
      */
     @Transactional
-    public RuleEntity updateRule(String id, CreateRuleRequest request) {
-        RuleEntity ruleEntity = ruleRepository.selectById(id);
-        if (ruleEntity == null) {
+    public void updateRule(String id, RuleEntity ruleEntity) {
+        RuleEntity existingRule = ruleRepository.selectById(id);
+        if (existingRule == null) {
             throw new IllegalArgumentException("规则不存在");
         }
         
-        ruleEntity.setVersion(request.getVersion());
-        ruleEntity.setDescription(request.getDescription());
-        ruleEntity.setRule(request.getRule());
+        existingRule.setVersion(ruleEntity.getVersion());
+        existingRule.setDescription(ruleEntity.getDescription());
+        existingRule.setRule(ruleEntity.getRule());
         
-        ruleRepository.updateById(ruleEntity);
-        return ruleEntity;
+        ruleRepository.updateById(existingRule);
+    }
+
+    /**
+     * 更新规则并创建新版本
+     * @param id 规则ID
+     * @param ruleEntity 规则实体
+     */
+    @Transactional
+    public void updateRuleWithVersion(String id, RuleEntity ruleEntity) {
+        // 1. 更新规则
+        updateRule(id, ruleEntity);
+        
+        // 2. 创建新的规则版本
+        RuleVersionEntity versionEntity = new RuleVersionEntity();
+        versionEntity.setRuleId(id);
+        versionEntity.setVersion(ruleEntity.getVersion());
+        versionEntity.setDescription(ruleEntity.getDescription());
+        versionEntity.setRule(ruleEntity.getRule());
+        versionEntity.setEffectiveAt(LocalDateTime.now());
+        versionEntity.setExpiredAt(null);
+        
+        ruleVersionRepository.insert(versionEntity);
     }
 } 

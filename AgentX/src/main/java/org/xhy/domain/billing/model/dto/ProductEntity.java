@@ -1,13 +1,10 @@
-package org.xhy.domain.billing.entity;
+package org.xhy.domain.billing.model.dto;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import org.xhy.infrastructure.entity.BaseEntity;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 /**
  * 产品实体
@@ -36,8 +33,8 @@ public class ProductEntity extends BaseEntity {
     private String description;
 
     /** 是否启用 */
-    @TableField("is_enabled")
-    private Boolean isEnabled;
+    @TableField("enabled")
+    private Boolean enabled;
 
     /** 规则ID */
     @TableField("rule_id")
@@ -83,12 +80,12 @@ public class ProductEntity extends BaseEntity {
         this.description = description;
     }
 
-    public Boolean getIsEnabled() {
-        return isEnabled;
+    public Boolean getEnabled() {
+        return enabled;
     }
 
-    public void setIsEnabled(Boolean isEnabled) {
-        this.isEnabled = isEnabled;
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 
     public String getRuleId() {

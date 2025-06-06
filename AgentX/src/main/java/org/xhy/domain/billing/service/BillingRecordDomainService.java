@@ -3,14 +3,14 @@ package org.xhy.domain.billing.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.stereotype.Service;
-import org.xhy.domain.billing.entity.BillingUsageRecordEntity;
-import org.xhy.domain.billing.model.BaseRule;
-import org.xhy.domain.billing.model.BillingRule;
+import org.xhy.domain.billing.model.dto.BillingUsageRecordEntity;
+import org.xhy.domain.billing.model.config.BaseRule;
+import org.xhy.domain.billing.model.config.BillingRule;
 import org.xhy.domain.billing.repository.BillingRecordRepository;
-import org.xhy.domain.billing.entity.RuleVersionEntity;
+import org.xhy.domain.billing.model.dto.RuleVersionEntity;
 import org.xhy.domain.billing.repository.RuleVersionRepository;
 import com.alibaba.fastjson.JSON;
-import java.util.List;
+
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
 
@@ -31,21 +31,18 @@ public class BillingRecordDomainService {
         this.ruleVersionRepository = ruleVersionRepository;
     }
 
-
     /**
      * 分页查询用户的账单记录
      * 
      * @param userId 用户ID
-     * @param pageNum 页码，从1开始
-     * @param pageSize 每页大小
+     * @param page 分页参数
      * @return 账单记录列表
      */
-    public List<BillingUsageRecordEntity> queryRecords(String userId, int pageNum, int pageSize) {
-        Page<BillingUsageRecordEntity> page = new Page<>(pageNum, pageSize);
+    public Page<BillingUsageRecordEntity> getRecords(String userId, Page<BillingUsageRecordEntity> page) {
         LambdaQueryWrapper<BillingUsageRecordEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(BillingUsageRecordEntity::getUserId, userId)
                .orderByDesc(BillingUsageRecordEntity::getCreatedAt);
-        return billingRecordRepository.selectPage(page, wrapper).getRecords();
+        return billingRecordRepository.selectPage(page, wrapper);
     }
 
     /**
@@ -104,37 +101,12 @@ public class BillingRecordDomainService {
      * @return 价格规则文本
      */
     private String generatePriceRuleText(BaseRule rule) {
-        // 检查 rule 是否为 null
-        if (rule == null) {
-            return "未知计费规则";
+        if (rule instanceof BillingRule) {
+            BillingRule billingRule = (BillingRule) rule;
+            return String.format("输入token计费：%.2f/1k，输出token计费：%.2f/1k",
+                    billingRule.getInputToken(),
+                    billingRule.getOutputToken());
         }
-
-        // 检查是否为 BillingRule 类型
-        if (!(rule instanceof BillingRule)) {
-            return "未知计费规则";
-        }
-
-        BillingRule billingRule = (BillingRule) rule;
-        StringBuilder text = new StringBuilder();
-        
-        // 输入token计费规则
-        if (billingRule.getInputToken() != null) {
-            text.append("输入token计费：")
-                .append(billingRule.getInputToken().toString())
-                .append("/1k");
-        }
-        
-        // 输出token计费规则
-        if (billingRule.getOutputToken() != null) {
-            if (text.length() > 0) {
-                text.append("，");
-            }
-            text.append("输出token计费：")
-                .append(billingRule.getOutputToken().toString())
-                .append("/1k");
-        }
-        
-        return text.length() > 0 ? text.toString() : "未知计费规则";
+        return "未知规则类型";
     }
-
 } 

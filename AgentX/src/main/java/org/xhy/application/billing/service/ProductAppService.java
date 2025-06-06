@@ -1,17 +1,14 @@
 package org.xhy.application.billing.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.xhy.application.billing.assembler.ProductAssembler;
 import org.xhy.application.billing.dto.ProductListDTO;
-import org.xhy.domain.billing.entity.ProductEntity;
-import org.xhy.domain.billing.service.ProductService;
-import org.xhy.infrastructure.auth.UserContext;
-import org.xhy.interfaces.dto.Page;
+import org.xhy.domain.billing.model.dto.ProductEntity;
+import org.xhy.domain.billing.service.ProductDomainService;
 import org.xhy.interfaces.dto.billing.CreateProductRequest;
-import org.xhy.interfaces.dto.billing.PageResult;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -22,44 +19,40 @@ import java.util.stream.Collectors;
  **/
 @Service
 public class ProductAppService {
-    private final ProductService productService;
+    private final ProductDomainService productDomainService;
 
-    public ProductAppService(ProductService productService) {
-        this.productService = productService;
+    public ProductAppService(ProductDomainService productService) {
+        this.productDomainService = productService;
     }
 
     /**
      * 创建产品
      * @param request 创建产品请求
      */
+    @Transactional
     public void createProduct(CreateProductRequest request) {
         ProductEntity productEntity = ProductAssembler.toEntity(request);
-        productService.createProduct(productEntity);
+        productDomainService.createProduct(productEntity);
     }
 
     /**
      * 查询产品列表
+     * @param page 分页参数
+     * @return 产品列表
      */
-    public PageResult<ProductListDTO> queryProducts(Page page) {
-        List<ProductEntity> products = productService.queryProducts(page.getPage(), page.getPageSize());
-        List<ProductListDTO> dtoList = products.stream()
+    public Page<ProductListDTO> getProducts(Page<ProductEntity> page) {
+        // 调用领域服务查询产品列表
+        Page<ProductEntity> productPage = productDomainService.getProducts(page);
+        
+        // 转换为DTO
+        Page<ProductListDTO> dtoPage = new Page<>(productPage.getCurrent(), productPage.getSize(), productPage.getTotal());
+        dtoPage.setRecords(productPage.getRecords().stream()
                 .map(ProductAssembler::toDTO)
-                .collect(Collectors.toList());
-        return new PageResult<>(dtoList, products.size(), page.getPage(), page.getPageSize());
+                .collect(Collectors.toList()));
+        
+        return dtoPage;
     }
 
-    /**
-     * 查询我的产品列表
-     */
-    @Transactional(readOnly = true)
-    public PageResult<ProductListDTO> queryMyProducts(Page page) {
-        String userId = UserContext.getCurrentUserId();
-        List<ProductEntity> products = productService.queryMyProducts(userId, page.getPage(), page.getPageSize());
-        List<ProductListDTO> dtoList = products.stream()
-                .map(ProductAssembler::toDTO)
-                .collect(Collectors.toList());
-        return new PageResult<>(dtoList, products.size(), page.getPage(), page.getPageSize());
-    }
 
     /**
      * 更新产品
@@ -70,6 +63,6 @@ public class ProductAppService {
     public void updateProduct(String id, CreateProductRequest request) {
         ProductEntity entity = ProductAssembler.toEntity(request);
         entity.setId(id);
-        productService.updateProduct(entity);
+        productDomainService.updateProduct(entity);
     }
 }

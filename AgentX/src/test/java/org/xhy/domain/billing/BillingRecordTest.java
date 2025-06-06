@@ -1,13 +1,15 @@
 package org.xhy.domain.billing;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.xhy.domain.billing.entity.BillingUsageRecordEntity;
-import org.xhy.domain.billing.entity.ProductEntity;
-import org.xhy.domain.billing.entity.RuleEntity;
-import org.xhy.domain.billing.entity.RuleVersionEntity;
-import org.xhy.domain.billing.model.BillingRule;
+import org.springframework.transaction.annotation.Transactional;
+import org.xhy.domain.billing.model.dto.BillingUsageRecordEntity;
+import org.xhy.domain.billing.model.dto.ProductEntity;
+import org.xhy.domain.billing.model.dto.RuleEntity;
+import org.xhy.domain.billing.model.dto.RuleVersionEntity;
+import org.xhy.domain.billing.model.config.BillingRule;
 import org.xhy.domain.billing.repository.BillingRecordRepository;
 import org.xhy.domain.billing.repository.RuleRepository;
 import org.xhy.domain.billing.repository.RuleVersionRepository;
@@ -23,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * 账单记录服务测试类
  */
 @SpringBootTest
-
 public class BillingRecordTest {
 
     @Autowired
@@ -76,7 +77,7 @@ public class BillingRecordTest {
         product.setDescription("测试产品描述");
         product.setRuleId(ruleId);  // 关联到规则表
         product.setUserId(userId);
-        product.setIsEnabled(true);
+        product.setEnabled(true);
 
         // 4. 创建账单记录
         BillingUsageRecordEntity record = billingRecordDomainService.createRecord(
@@ -90,6 +91,7 @@ public class BillingRecordTest {
         // 验证创建结果
         assertNotNull(record, "创建记录不应该返回null");
         assertNotNull(record.getId(), "记录ID不应该为null");
+        assertTrue(isValidUUID(record.getId()), "ID应该是有效的UUID");
         assertEquals(userId, record.getUserId());
         assertEquals(productId, record.getProductId());
         assertEquals(ruleVersionId, record.getRuleVersionId());
@@ -98,16 +100,16 @@ public class BillingRecordTest {
         assertEquals(amountLeft, record.getAmountLeft());
 
         // 5. 查询账单记录
-        List<BillingUsageRecordEntity> records = billingRecordDomainService.queryRecords(userId, 1, 10);
+        Page<BillingUsageRecordEntity> page = new Page<>(1, 10);
+        Page<BillingUsageRecordEntity> records = billingRecordDomainService.getRecords(userId, page);
 
         // 验证查询结果
         assertNotNull(records);
-        assertFalse(records.isEmpty());
-        assertEquals(1, records.size());
+        assertFalse(records.getRecords().isEmpty());
+        assertEquals(1, records.getRecords().size());
 
         // 验证总记录数
-        long count = billingRecordDomainService.countRecords(userId);
-        assertEquals(1, count);
+        assertEquals(1, records.getTotal());
     }
 
     @Test
@@ -148,7 +150,7 @@ public class BillingRecordTest {
         product.setDescription("测试产品描述");
         product.setRuleId(ruleId);
         product.setUserId(userId);
-        product.setIsEnabled(true);
+        product.setEnabled(true);
 
         // 创建10条记录
         for (int i = 0; i < 10; i++) {
@@ -165,16 +167,16 @@ public class BillingRecordTest {
         }
 
         // 测试分页查询
-        List<BillingUsageRecordEntity> page1 = billingRecordDomainService.queryRecords(userId, 1, 3);
-        List<BillingUsageRecordEntity> page2 = billingRecordDomainService.queryRecords(userId, 2, 3);
-        List<BillingUsageRecordEntity> page3 = billingRecordDomainService.queryRecords(userId, 3, 3);
+        Page<BillingUsageRecordEntity> page1 = billingRecordDomainService.getRecords(userId, new Page<>(1, 3));
+        Page<BillingUsageRecordEntity> page2 = billingRecordDomainService.getRecords(userId, new Page<>(2, 3));
+        Page<BillingUsageRecordEntity> page3 = billingRecordDomainService.getRecords(userId, new Page<>(3, 3));
 
         assertNotNull(page1);
         assertNotNull(page2);
         assertNotNull(page3);
-        assertEquals(3, page1.size());
-        assertEquals(3, page2.size());
-        assertEquals(3, page3.size());
+        assertEquals(3, page1.getRecords().size());
+        assertEquals(3, page2.getRecords().size());
+        assertEquals(3, page3.getRecords().size());
     }
 
     @Test
@@ -183,13 +185,13 @@ public class BillingRecordTest {
         String nonExistentUserId = UUID.randomUUID().toString();
         
         // 验证查询结果为空
-        List<BillingUsageRecordEntity> records = billingRecordDomainService.queryRecords(nonExistentUserId, 1, 10);
+        Page<BillingUsageRecordEntity> emptyPage = new Page<>(1, 10);
+        Page<BillingUsageRecordEntity> records = billingRecordDomainService.getRecords(nonExistentUserId, emptyPage);
         assertNotNull(records);
-        assertTrue(records.isEmpty());
+        assertTrue(records.getRecords().isEmpty());
 
         // 验证总记录数为0
-        long count = billingRecordDomainService.countRecords(nonExistentUserId);
-        assertEquals(0, count);
+        assertEquals(0, records.getTotal());
     }
 
     @Test
@@ -199,7 +201,7 @@ public class BillingRecordTest {
         String productId = UUID.randomUUID().toString();
         String ruleId = UUID.randomUUID().toString();
         String ruleVersionId = UUID.randomUUID().toString();
-
+        
         // 1. 创建规则
         RuleEntity rule = new RuleEntity();
         rule.setId(ruleId);
@@ -228,8 +230,8 @@ public class BillingRecordTest {
         product.setDescription("测试产品描述");
         product.setRuleId(ruleId);
         product.setUserId(userId);
-        product.setIsEnabled(true);
-
+        product.setEnabled(true);
+        
         // 创建账单记录，部分字段为null
         BillingUsageRecordEntity record = billingRecordDomainService.createRecord(
             userId,

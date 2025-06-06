@@ -1,17 +1,15 @@
 package org.xhy.application.billing.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.xhy.application.billing.assembler.BillingRecordAssembler;
 import org.xhy.application.billing.dto.BillingRecordDTO;
-import org.xhy.domain.billing.entity.BillingUsageRecordEntity;
+import org.xhy.domain.billing.model.dto.BillingUsageRecordEntity;
 import org.xhy.domain.billing.service.BillingRecordDomainService;
 import org.xhy.infrastructure.auth.UserContext;
-import org.xhy.interfaces.dto.Page;
-import org.xhy.interfaces.dto.billing.PageResult;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -36,21 +34,17 @@ public class BillingRecordAppService {
      * 查询账单记录
      */
     @Transactional(readOnly = true)
-    public PageResult<BillingRecordDTO> queryRecords(Page page) {
+    public Page<BillingRecordDTO> getRecords(Page<BillingUsageRecordEntity> page) {
         String userId = UserContext.getCurrentUserId();
-        List<BillingUsageRecordEntity> records = billingRecordDomainService.queryRecords(
-            userId,
-            page.getPage(), 
-            page.getPageSize()
-        );
-        
-        // 查询总数
-        long total = billingRecordDomainService.countRecords(userId);
+        Page<BillingUsageRecordEntity> recordPage = billingRecordDomainService.getRecords(userId, page);
         
         // 转换为DTO
-        List<BillingRecordDTO> dtoList = BillingRecordAssembler.toDTOs(records);
+        Page<BillingRecordDTO> dtoPage = new Page<>(recordPage.getCurrent(), recordPage.getSize(), recordPage.getTotal());
+        dtoPage.setRecords(recordPage.getRecords().stream()
+                .map(BillingRecordAssembler::toDTO)
+                .collect(Collectors.toList()));
         
-        return new PageResult<>(dtoList, total, page.getPage(), page.getPageSize());
+        return dtoPage;
     }
 
     /**

@@ -1,13 +1,8 @@
 package org.xhy.domain.billing.repository;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.apache.ibatis.annotations.Mapper;
-import org.xhy.domain.billing.entity.UserBillingCountEntity;
+import org.xhy.domain.billing.model.dto.UserBillingCountEntity;
 import org.xhy.infrastructure.repository.MyBatisPlusExtRepository;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 /**
  * XHY

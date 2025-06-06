@@ -1,28 +1,35 @@
 package org.xhy.domain.billing.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.xhy.application.billing.assembler.ProductAssembler;
-import org.xhy.domain.billing.entity.ProductEntity;
+import org.xhy.domain.billing.model.dto.ProductEntity;
 import org.xhy.domain.billing.repository.ProductRepository;
 import org.xhy.domain.user.model.UserEntity;
 import org.xhy.domain.user.service.UserDomainService;
 import org.xhy.interfaces.dto.billing.CreateProductRequest;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 class ProductServiceTest {
 
     @Autowired
-    private ProductService productService;
+    private ProductDomainService productService;
 
     @Autowired
     private ProductRepository productRepository;
@@ -91,7 +98,7 @@ class ProductServiceTest {
         assertEquals("这是一个测试产品", savedProduct.getDescription());
         assertEquals(userId, savedProduct.getUserId());
         assertEquals(ruleId, savedProduct.getRuleId());
-        assertTrue(savedProduct.getIsEnabled());
+        assertTrue(savedProduct.getEnabled());
     }
 
     @Test
@@ -119,75 +126,80 @@ class ProductServiceTest {
         assertEquals("这是一个测试产品", savedProduct.getDescription());
         assertEquals(userId, savedProduct.getUserId());
         assertNull(savedProduct.getRuleId());
-        assertTrue(savedProduct.getIsEnabled());
+        assertTrue(savedProduct.getEnabled());
     }
 
     @Test
-    void queryProducts_ShouldReturnPaginatedResults() {
+    void getProducts_ShouldReturnPaginatedResults() {
+        // 准备测试数据
+        Page<ProductEntity> page = new Page<>(1, 10);
+        List<ProductEntity> products = createTestProducts(5);
+        when(productRepository.selectPage(any(), any())).thenReturn(page.setRecords(products));
+
         // 执行测试
-        List<ProductEntity> result = productService.queryProducts(1, 3);
+        Page<ProductEntity> result = productService.getProducts(page);
 
         // 验证结果
         assertNotNull(result);
-        assertEquals(3, result.size()); // 第一页应该有3个产品
-
-        // 验证实体
-        ProductEntity product1 = result.get(0);
-        assertNotNull(product1.getId());
-        assertEquals("聊天助手", product1.getProductName());
-        assertEquals("CHAT", product1.getProductType());
-        assertEquals("智能聊天助手", product1.getDescription());
+        assertEquals(5, result.getRecords().size());
+        verify(productRepository).selectPage(eq(page), any());
     }
 
     @Test
-    void queryMyProducts_ShouldReturnUserProducts() {
+    void getProducts_ShouldReturnEmptyList_WhenNoProducts() {
+        // 准备测试数据
+        Page<ProductEntity> page = new Page<>(1, 10);
+        when(productRepository.selectPage(any(), any())).thenReturn(page.setRecords(Collections.emptyList()));
+
         // 执行测试
-        List<ProductEntity> result = productService.queryMyProducts(userId, 1, 10);
+        Page<ProductEntity> result = productService.getProducts(page);
 
         // 验证结果
         assertNotNull(result);
-        assertEquals(3, result.size()); // 用户1有3个产品
-
-        // 验证实体
-        ProductEntity product1 = result.get(0);
-        assertNotNull(product1.getId());
-        assertEquals("聊天助手", product1.getProductName());
-        assertEquals("CHAT", product1.getProductType());
-        assertEquals("智能聊天助手", product1.getDescription());
-    }
-
-    @Test
-    void queryProducts_ShouldReturnEmptyList_WhenNoProducts() {
-        // 清空数据库中的产品
-        productRepository.delete(null);
-
-        // 执行测试
-        List<ProductEntity> result = productService.queryProducts(1, 10);
-
-        // 验证结果
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertTrue(result.getRecords().isEmpty());
+        verify(productRepository).selectPage(eq(page), any());
     }
 
     private ProductEntity createProductEntity(String name, String type, String description, String userId) {
         return createProductEntity(name, type, description, userId, true, null);
     }
 
-    private ProductEntity createProductEntity(String name, String type, String description, String userId, boolean isEnabled) {
-        return createProductEntity(name, type, description, userId, isEnabled, null);
+    private ProductEntity createProductEntity(String name, String type, String description, String userId, boolean enabled) {
+        return createProductEntity(name, type, description, userId, enabled, null);
     }
 
-    private ProductEntity createProductEntity(String name, String type, String description, String userId, boolean isEnabled, String ruleId) {
+    private ProductEntity createProductEntity(String name, String type, String description, String userId, boolean enabled, String ruleId) {
         ProductEntity entity = new ProductEntity();
         entity.setId(UUID.randomUUID().toString());
         entity.setProductName(name);
         entity.setProductType(type);
         entity.setDescription(description);
         entity.setUserId(userId);
-        entity.setIsEnabled(isEnabled);
+        entity.setEnabled(enabled);
         entity.setRuleId(ruleId);
         entity.setCreatedAt(LocalDateTime.now());
         entity.setUpdatedAt(LocalDateTime.now());
         return entity;
+    }
+
+    /**
+     * 创建测试产品数据
+     * @param count 产品数量
+     * @return 产品列表
+     */
+    private List<ProductEntity> createTestProducts(int count) {
+        List<ProductEntity> products = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            ProductEntity product = new ProductEntity();
+            product.setId(UUID.randomUUID().toString());
+            product.setProductName("测试产品" + (i + 1));
+            product.setProductType("TEST");
+            product.setDescription("测试产品描述" + (i + 1));
+            product.setEnabled(true);
+            product.setCreatedAt(LocalDateTime.now());
+            product.setUpdatedAt(LocalDateTime.now());
+            products.add(product);
+        }
+        return products;
     }
 } 

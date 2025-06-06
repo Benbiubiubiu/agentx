@@ -1,7 +1,8 @@
 package org.xhy.domain.billing.service;
 
 import org.springframework.stereotype.Service;
-import org.xhy.domain.billing.entity.UserBillingCountEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.xhy.domain.billing.model.dto.UserBillingCountEntity;
 import org.xhy.domain.billing.repository.UserBillingCountRepository;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
@@ -9,11 +10,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
-public class UserBillingCountService {
+public class UserBillingCountDomainService {
     
     private final UserBillingCountRepository billingCountRepository;
 
-    public UserBillingCountService(UserBillingCountRepository billingCountRepository) {
+    public UserBillingCountDomainService(UserBillingCountRepository billingCountRepository) {
         this.billingCountRepository = billingCountRepository;
     }
 
@@ -22,7 +23,7 @@ public class UserBillingCountService {
      * @param userId 用户ID
      * @return 用户账单统计实体
      */
-    public UserBillingCountEntity queryBalance(String userId) {
+    public UserBillingCountEntity getBalance(String userId) {
         LambdaQueryWrapper<UserBillingCountEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(UserBillingCountEntity::getUserId, userId);
         return billingCountRepository.selectOne(wrapper);
@@ -35,7 +36,7 @@ public class UserBillingCountService {
      * @return 更新后的用户账单统计实体
      */
     public UserBillingCountEntity increaseBalance(String userId, BigDecimal amount) {
-        UserBillingCountEntity entity = queryBalance(userId);
+        UserBillingCountEntity entity = getBalance(userId);
         if (entity == null) {
             entity = new UserBillingCountEntity();
             entity.setUserId(userId);

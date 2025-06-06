@@ -3,8 +3,8 @@ package org.xhy.application.billing.service;
 import org.springframework.stereotype.Service;
 import org.xhy.application.billing.assembler.BalanceAssembler;
 import org.xhy.application.billing.dto.BalanceDTO;
-import org.xhy.domain.billing.entity.UserBillingCountEntity;
-import org.xhy.domain.billing.service.UserBillingCountService;
+import org.xhy.domain.billing.model.dto.UserBillingCountEntity;
+import org.xhy.domain.billing.service.UserBillingCountDomainService;
 
 /**
  * 用户账单计数应用服务
@@ -13,10 +13,10 @@ import org.xhy.domain.billing.service.UserBillingCountService;
 @Service
 public class UserBillingCountAppService {
 
-    private final UserBillingCountService userBillingCountService;
+    private final UserBillingCountDomainService userBillingCountDomainService;
 
-    public UserBillingCountAppService(UserBillingCountService userBillingCountService) {
-        this.userBillingCountService = userBillingCountService;
+    public UserBillingCountAppService(UserBillingCountDomainService userBillingCountService) {
+        this.userBillingCountDomainService = userBillingCountService;
     }
 
     /**
@@ -24,8 +24,8 @@ public class UserBillingCountAppService {
      * @param userId 用户ID
      * @return 余额信息
      */
-    public BalanceDTO queryBalance(String userId) {
-        UserBillingCountEntity balance = userBillingCountService.queryBalance(userId);
+    public BalanceDTO getBalance(String userId) {
+        UserBillingCountEntity balance = userBillingCountDomainService.getBalance(userId);
         return BalanceAssembler.toDTO(balance);
     }
 } 

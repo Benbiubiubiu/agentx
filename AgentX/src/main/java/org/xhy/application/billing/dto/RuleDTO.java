@@ -1,6 +1,6 @@
 package org.xhy.application.billing.dto;
 
-import org.xhy.domain.billing.model.BaseRule;
+import org.xhy.domain.billing.model.config.BaseRule;
 
 import java.time.LocalDateTime;
 

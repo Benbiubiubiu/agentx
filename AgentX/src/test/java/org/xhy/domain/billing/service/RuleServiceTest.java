@@ -4,17 +4,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
-import org.xhy.domain.billing.entity.RuleEntity;
-import org.xhy.domain.billing.entity.RuleVersionEntity;
-import org.xhy.domain.billing.entity.ProductEntity;
-import org.xhy.domain.billing.model.BillingRule;
+import org.xhy.domain.billing.model.dto.RuleEntity;
+import org.xhy.domain.billing.model.dto.RuleVersionEntity;
+import org.xhy.domain.billing.model.dto.ProductEntity;
+import org.xhy.domain.billing.model.config.BillingRule;
 import org.xhy.domain.billing.repository.ProductRepository;
 import org.xhy.domain.user.model.UserEntity;
 import org.xhy.domain.user.service.UserDomainService;
 import org.xhy.interfaces.dto.billing.CreateRuleRequest;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class RuleServiceTest {
 
     @Autowired
-    private RuleService ruleService;
+    private RuleDomainService ruleService;
 
     @Autowired
     private ProductRepository productRepository;
@@ -45,7 +45,7 @@ class RuleServiceTest {
         product.setProductName("测试产品");
         product.setProductType("CHAT");
         product.setDescription("这是一个测试产品");
-        product.setIsEnabled(true);
+        product.setEnabled(true);
         productRepository.insert(product);
         productId = product.getId();
     }
@@ -92,7 +92,7 @@ class RuleServiceTest {
         product.setProductName("不支持的产品");
         product.setProductType("OTHER");  // 不支持的产品类型
         product.setDescription("这是一个不支持的产品");
-        product.setIsEnabled(true);
+        product.setEnabled(true);
         productRepository.insert(product);
 
         CreateRuleRequest request = new CreateRuleRequest();
@@ -117,7 +117,7 @@ class RuleServiceTest {
         CreateRuleRequest request = new CreateRuleRequest();
         request.setVersion("1.0.0");
         request.setDescription("测试规则");
-        request.setProductId(productId);  // 设置产品ID
+        request.setProductId(productId);
 
         BillingRule billingRule = new BillingRule();
         billingRule.setInputToken(0.004);
@@ -135,8 +135,17 @@ class RuleServiceTest {
         LocalDateTime effectiveAt = LocalDateTime.now();
         LocalDateTime expiredAt = effectiveAt.plusMonths(1);
 
+        // 创建规则版本实体
+        RuleVersionEntity versionEntity = new RuleVersionEntity();
+        versionEntity.setRuleId(rule.getId());
+        versionEntity.setVersion(versionRequest.getVersion());
+        versionEntity.setDescription(versionRequest.getDescription());
+        versionEntity.setRule(versionRequest.getRule());
+        versionEntity.setEffectiveAt(effectiveAt);
+        versionEntity.setExpiredAt(expiredAt);
+
         // 执行测试
-        RuleVersionEntity version = ruleService.createRuleVersion(rule.getId(), versionRequest, effectiveAt, expiredAt);
+        RuleVersionEntity version = ruleService.createRuleVersion(versionEntity);
 
         // 验证结果
         assertNotNull(version);
@@ -147,5 +156,57 @@ class RuleServiceTest {
         assertEquals(effectiveAt, version.getEffectiveAt());
         assertEquals(expiredAt, version.getExpiredAt());
         assertNotNull(version.getRule());
+    }
+
+    @Test
+    void deleteRule_ShouldDeleteRuleAndVersions() {
+        // 先创建一个规则
+        CreateRuleRequest request = new CreateRuleRequest();
+        request.setVersion("1.0.0");
+        request.setDescription("测试规则");
+        request.setProductId(productId);
+
+        BillingRule billingRule = new BillingRule();
+        billingRule.setInputToken(0.004);
+        billingRule.setOutputToken(0.007);
+        request.setRule(billingRule);
+
+        RuleEntity rule = ruleService.createRule(request);
+        String ruleId = rule.getId();
+
+        // 创建规则版本
+        CreateRuleRequest versionRequest = new CreateRuleRequest();
+        versionRequest.setVersion("1.0.1");
+        versionRequest.setDescription("测试规则版本");
+        versionRequest.setRule(billingRule);
+
+        LocalDateTime effectiveAt = LocalDateTime.now();
+        LocalDateTime expiredAt = effectiveAt.plusMonths(1);
+
+        RuleVersionEntity versionEntity = new RuleVersionEntity();
+        versionEntity.setRuleId(ruleId);
+        versionEntity.setVersion(versionRequest.getVersion());
+        versionEntity.setDescription(versionRequest.getDescription());
+        versionEntity.setRule(versionRequest.getRule());
+        versionEntity.setEffectiveAt(effectiveAt);
+        versionEntity.setExpiredAt(expiredAt);
+
+        ruleService.createRuleVersion(versionEntity);
+
+        // 执行删除操作
+        ruleService.deleteRule(ruleId, productId);
+
+        // 验证规则已被删除
+        RuleEntity deletedRule = ruleService.getRule(ruleId);
+        assertNull(deletedRule);
+
+        // 验证规则版本已被删除
+        List<RuleVersionEntity> versions = ruleService.getRuleVersions(ruleId);
+        assertTrue(versions.isEmpty());
+
+        // 验证产品表中的规则ID已被清除
+        ProductEntity product = productRepository.selectById(productId);
+        assertNotNull(product);
+        assertNull(product.getRuleId());
     }
 }

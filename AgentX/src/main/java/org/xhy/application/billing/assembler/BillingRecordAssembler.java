@@ -1,7 +1,7 @@
 package org.xhy.application.billing.assembler;
 
 import org.xhy.application.billing.dto.BillingRecordDTO;
-import org.xhy.domain.billing.entity.BillingUsageRecordEntity;
+import org.xhy.domain.billing.model.dto.BillingUsageRecordEntity;
 
 import java.util.Collections;
 import java.util.List;

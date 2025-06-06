@@ -3,11 +3,14 @@ package org.xhy.application.billing.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.xhy.application.billing.assembler.RuleAssembler;
+import org.xhy.application.billing.assembler.RuleVersionAssembler;
 import org.xhy.application.billing.dto.RuleDTO;
-import org.xhy.domain.billing.entity.RuleEntity;
-import org.xhy.domain.billing.entity.RuleVersionEntity;
-import org.xhy.domain.billing.service.RuleService;
+import org.xhy.domain.billing.model.dto.RuleEntity;
+import org.xhy.domain.billing.model.dto.RuleVersionEntity;
+import org.xhy.domain.billing.service.RuleDomainService;
 import org.xhy.interfaces.dto.billing.CreateRuleRequest;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -22,10 +25,10 @@ import java.util.List;
 @Service
 public class RuleAppService {
 
-    private final RuleService ruleService;
+    private final RuleDomainService ruleDomainService;
 
-    public RuleAppService(RuleService ruleService) {
-        this.ruleService = ruleService;
+    public RuleAppService(RuleDomainService ruleService) {
+        this.ruleDomainService = ruleService;
     }
 
     /**
@@ -36,7 +39,7 @@ public class RuleAppService {
     @Transactional
     public RuleDTO createRule(CreateRuleRequest request) {
         // 调用领域服务创建规则
-        RuleEntity rule = ruleService.createRule(request);
+        RuleEntity rule = ruleDomainService.createRule(request);
         
         // 转换为DTO
         return RuleAssembler.toDTO(rule);
@@ -48,7 +51,7 @@ public class RuleAppService {
      * @return 规则信息
      */
     public RuleDTO getRule(String ruleId) {
-        RuleEntity rule = ruleService.getRule(ruleId);
+        RuleEntity rule = ruleDomainService.getRule(ruleId);
         return RuleAssembler.toDTO(rule);
     }
 
@@ -56,24 +59,23 @@ public class RuleAppService {
      * 更新规则
      * @param ruleId 规则ID
      * @param request 更新规则请求
-     * @return 更新后的规则
      */
     @Transactional
-    public RuleDTO updateRule(String ruleId, CreateRuleRequest request) {
+    public void updateRule(String ruleId, CreateRuleRequest request) {
+        // 将请求转换为领域实体
+        RuleEntity ruleEntity = RuleAssembler.toEntity(request);
         // 调用领域服务更新规则
-        RuleEntity ruleEntity = ruleService.updateRule(ruleId, request);
-        
-        // 转换为DTO
-        return RuleAssembler.toDTO(ruleEntity);
+        ruleDomainService.updateRuleWithVersion(ruleId, ruleEntity);
     }
 
     /**
      * 删除规则
      * @param ruleId 规则ID
+     * @param productId 产品ID
      */
     @Transactional
-    public void deleteRule(String ruleId) {
-        ruleService.deleteRule(ruleId);
+    public void deleteRule(String ruleId, String productId) {
+        ruleDomainService.deleteRule(ruleId, productId);
     }
 
     /**
@@ -82,7 +84,7 @@ public class RuleAppService {
      * @return 规则版本列表
      */
     public List<RuleVersionEntity> getRuleVersions(String ruleId) {
-        return ruleService.getRuleVersions(ruleId);
+        return ruleDomainService.getRuleVersions(ruleId);
     }
 
     /**
@@ -91,6 +93,23 @@ public class RuleAppService {
      * @return 当前有效的规则版本
      */
     public RuleVersionEntity getCurrentRuleVersion(String ruleId) {
-        return ruleService.getCurrentRuleVersion(ruleId);
+        return ruleDomainService.getCurrentRuleVersion(ruleId);
+    }
+
+    /**
+     * 创建规则版本
+     * @param ruleId 规则ID
+     * @param request 创建规则请求
+     * @param effectiveAt 生效时间
+     * @param expiredAt 过期时间
+     * @return 创建的规则版本
+     */
+    @Transactional
+    public RuleVersionEntity createRuleVersion(String ruleId, CreateRuleRequest request,
+                                             LocalDateTime effectiveAt, LocalDateTime expiredAt) {
+        // 将请求转换为领域实体
+        RuleVersionEntity versionEntity = RuleVersionAssembler.toEntity(ruleId, request, effectiveAt, expiredAt);
+        // 调用领域服务创建规则版本
+        return ruleDomainService.createRuleVersion(versionEntity);
     }
 } 

@@ -3,7 +3,7 @@ package org.xhy.domain.billing;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.xhy.domain.billing.entity.UserBillingCountEntity;
+import org.xhy.domain.billing.model.dto.UserBillingCountEntity;
 import org.xhy.domain.billing.repository.UserBillingCountRepository;
 
 import java.math.BigDecimal;

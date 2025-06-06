@@ -1,6 +1,6 @@
 package org.xhy.interfaces.dto.billing;
 
-import org.xhy.domain.billing.model.BaseRule;
+import org.xhy.domain.billing.model.config.BaseRule;
 
 /**
  * 创建规则请求DTO
