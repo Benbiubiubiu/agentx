@@ -1,7 +1,8 @@
-package org.xhy.application.billing.assembler;
+package org.xhy.application.rule.assembler;
 
-import org.xhy.application.billing.dto.RuleDTO;
-import org.xhy.domain.billing.model.dto.RuleEntity;
+import org.springframework.beans.BeanUtils;
+import org.xhy.application.rule.dto.RuleDTO;
+import org.xhy.domain.rule.model.dto.RuleEntity;
 import org.xhy.interfaces.dto.billing.CreateRuleRequest;
 
 import java.time.LocalDateTime;
@@ -20,14 +21,8 @@ public class RuleAssembler {
      */
     public static RuleEntity toEntity(CreateRuleRequest request) {
         RuleEntity entity = new RuleEntity();
-        entity.setVersion(request.getVersion());
-        entity.setDescription(request.getDescription());
-        entity.setRule(request.getRule());
+        BeanUtils.copyProperties(request, entity);
 
-        // 设置创建和更新时间
-        LocalDateTime now = LocalDateTime.now();
-        entity.setCreatedAt(now);
-        entity.setUpdatedAt(now);
 
         return entity;
     }
@@ -39,15 +34,8 @@ public class RuleAssembler {
         if (entity == null) {
             return null;
         }
-
         RuleDTO dto = new RuleDTO();
-        dto.setId(entity.getId());
-        dto.setVersion(entity.getVersion());
-        dto.setDescription(entity.getDescription());
-        dto.setRule(entity.getRule());
-        dto.setCreatedAt(entity.getCreatedAt());
-        dto.setUpdatedAt(entity.getUpdatedAt());
-
+        BeanUtils.copyProperties(entity, dto);
         return dto;
     }
 

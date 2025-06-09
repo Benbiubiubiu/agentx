@@ -1,7 +1,7 @@
 package org.xhy.infrastructure.converter;
 
 import org.apache.ibatis.type.MappedTypes;
-import org.xhy.domain.billing.model.config.BillingRule;
+import org.xhy.domain.rule.model.config.BillingRule;
 
 
 /**

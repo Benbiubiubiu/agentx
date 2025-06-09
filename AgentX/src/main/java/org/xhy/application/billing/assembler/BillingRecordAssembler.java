@@ -1,5 +1,6 @@
 package org.xhy.application.billing.assembler;
 
+import org.springframework.beans.BeanUtils;
 import org.xhy.application.billing.dto.BillingRecordDTO;
 import org.xhy.domain.billing.model.dto.BillingUsageRecordEntity;
 
@@ -20,18 +21,8 @@ public class BillingRecordAssembler {
         if (entity == null) {
             return null;
         }
-
         BillingRecordDTO dto = new BillingRecordDTO();
-        dto.setId(entity.getId());
-        dto.setUserId(entity.getUserId());
-        dto.setProductId(entity.getProductId());
-        dto.setRuleVersionId(entity.getRuleVersionId());
-        dto.setPriceRule(entity.getPriceRule());
-        dto.setTotalAmount(entity.getTotalAmount());
-        dto.setAmountLeft(entity.getAmountLeft());
-        dto.setCreatedAt(entity.getCreatedAt());
-        dto.setUpdatedAt(entity.getUpdatedAt());
-
+        BeanUtils.copyProperties(entity, dto);
         return dto;
     }
 

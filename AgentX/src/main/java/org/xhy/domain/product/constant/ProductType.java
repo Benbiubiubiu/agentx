@@ -1,4 +1,4 @@
-package org.xhy.domain.billing.constant;
+package org.xhy.domain.product.constant;
 
 import org.xhy.infrastructure.exception.BusinessException;
 

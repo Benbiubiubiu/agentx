@@ -1,7 +1,7 @@
-package org.xhy.domain.billing.repository;
+package org.xhy.domain.rule.repository;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.xhy.domain.billing.model.dto.RuleVersionEntity;
+import org.xhy.domain.rule.model.dto.RuleVersionEntity;
 import org.xhy.infrastructure.repository.MyBatisPlusExtRepository;
 
 /**

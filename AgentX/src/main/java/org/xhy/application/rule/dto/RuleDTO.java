@@ -1,47 +1,32 @@
-package org.xhy.application.billing.dto;
+package org.xhy.application.rule.dto;
 
-import java.math.BigDecimal;
+import org.xhy.domain.rule.model.config.BaseRule;
+
 import java.time.LocalDateTime;
 
 /**
- * 产品列表DTO
+ * 规则数据传输对象，用于表示层和应用层之间传递规则数据
  */
-public class ProductListDTO {
-    /**
-     * 产品ID
-     */
+public class RuleDTO {
+    /** 规则ID */
     private String id;
-
-    /**
-     * 产品名称
-     */
-    private String name;
-
-    /**
-     * 产品描述
-     */
+    
+    /** 版本号 */
+    private String version;
+    
+    /** 规则描述 */
     private String description;
-
-    /**
-     * 产品价格
-     */
-    private BigDecimal price;
-
-    /**
-     * 产品类型
-     */
-    private String type;
-
-    /**
-     * 创建时间
-     */
+    
+    /** 规则内容 */
+    private BaseRule rule;
+    
+    /** 创建时间 */
     private LocalDateTime createdAt;
-
-    /**
-     * 更新时间
-     */
+    
+    /** 更新时间 */
     private LocalDateTime updatedAt;
 
+    // Getter和Setter方法
     public String getId() {
         return id;
     }
@@ -50,12 +35,12 @@ public class ProductListDTO {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getVersion() {
+        return version;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public String getDescription() {
@@ -66,20 +51,12 @@ public class ProductListDTO {
         this.description = description;
     }
 
-    public BigDecimal getPrice() {
-        return price;
+    public BaseRule getRule() {
+        return rule;
     }
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
+    public void setRule(BaseRule rule) {
+        this.rule = rule;
     }
 
     public LocalDateTime getCreatedAt() {

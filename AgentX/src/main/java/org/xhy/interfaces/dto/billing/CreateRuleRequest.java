@@ -1,6 +1,7 @@
 package org.xhy.interfaces.dto.billing;
 
-import org.xhy.domain.billing.model.config.BaseRule;
+import org.xhy.domain.rule.model.config.BaseRule;
+import org.xhy.domain.rule.model.config.BillingRule;
 
 /**
  * 创建规则请求DTO
@@ -25,6 +26,11 @@ public class CreateRuleRequest {
      * 规则内容
      */
     private BaseRule rule;
+
+    /**
+     * 计费规则（用于前端传参）
+     */
+    private BillingRule billingRule;
 
     public String getProductId() {
         return productId;
@@ -56,5 +62,17 @@ public class CreateRuleRequest {
 
     public void setRule(BaseRule rule) {
         this.rule = rule;
+    }
+
+    public BillingRule getBillingRule() {
+        return billingRule;
+    }
+
+    public void setBillingRule(BillingRule billingRule) {
+        this.billingRule = billingRule;
+        // 将 billingRule 转换为 rule
+        if (billingRule != null) {
+            this.rule = billingRule;
+        }
     }
 }

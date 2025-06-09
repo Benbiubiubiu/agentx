@@ -1,4 +1,4 @@
-package org.xhy.domain.billing.model.config;
+package org.xhy.domain.rule.model.config;
 
 /**
  * 基础规则类

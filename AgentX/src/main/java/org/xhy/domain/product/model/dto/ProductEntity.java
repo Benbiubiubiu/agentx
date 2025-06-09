@@ -1,4 +1,4 @@
-package org.xhy.domain.billing.model.dto;
+package org.xhy.domain.product.model.dto;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;

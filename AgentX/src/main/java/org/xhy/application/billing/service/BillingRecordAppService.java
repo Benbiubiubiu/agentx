@@ -31,12 +31,14 @@ public class BillingRecordAppService {
     }
 
     /**
-     * 查询账单记录
+     * 查询账单记录列表
+     * @param page 分页参数
+     * @return 账单记录列表
      */
     @Transactional(readOnly = true)
-    public Page<BillingRecordDTO> getRecords(Page<BillingUsageRecordEntity> page) {
+    public Page<BillingRecordDTO> queryRecords(Page<BillingUsageRecordEntity> page) {
         String userId = UserContext.getCurrentUserId();
-        Page<BillingUsageRecordEntity> recordPage = billingRecordDomainService.getRecords(userId, page);
+        Page<BillingUsageRecordEntity> recordPage = billingRecordDomainService.queryRecords(userId, page);
         
         // 转换为DTO
         Page<BillingRecordDTO> dtoPage = new Page<>(recordPage.getCurrent(), recordPage.getSize(), recordPage.getTotal());

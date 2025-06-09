@@ -1,11 +1,11 @@
-package org.xhy.domain.billing.model.dto;
+package org.xhy.domain.rule.model.dto;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import org.apache.ibatis.type.JdbcType;
-import org.xhy.domain.billing.model.config.BaseRule;
+import org.xhy.domain.rule.model.config.BaseRule;
 import org.xhy.infrastructure.converter.BillingRuleConverter;
 import org.xhy.infrastructure.entity.BaseEntity;
 

@@ -1,7 +1,6 @@
 package org.xhy.domain.billing.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.xhy.domain.billing.model.dto.UserBillingCountEntity;
 import org.xhy.domain.billing.repository.UserBillingCountRepository;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;

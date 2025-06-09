@@ -1,32 +1,35 @@
-package org.xhy.application.billing.dto;
+package org.xhy.domain.rule.model.dto;
 
-import org.xhy.domain.billing.model.config.BaseRule;
-
-import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import org.xhy.domain.rule.model.config.BaseRule;
+import org.xhy.infrastructure.converter.BillingRuleConverter;
+import org.xhy.infrastructure.entity.BaseEntity;
 
 /**
- * 规则数据传输对象，用于表示层和应用层之间传递规则数据
+ * 规则实体类
  */
-public class RuleDTO {
+@TableName(value = "rule",autoResultMap = true)
+public class RuleEntity extends BaseEntity {
+    
     /** 规则ID */
+    @TableId(value = "id", type = IdType.ASSIGN_UUID)
     private String id;
-    
-    /** 版本号 */
-    private String version;
-    
-    /** 规则描述 */
-    private String description;
-    
-    /** 规则内容 */
-    private BaseRule rule;
-    
-    /** 创建时间 */
-    private LocalDateTime createdAt;
-    
-    /** 更新时间 */
-    private LocalDateTime updatedAt;
 
-    // Getter和Setter方法
+    /** 版本号 */
+    @TableField("version")
+    private String version;
+
+    /** 规则描述 */
+    @TableField("description")
+    private String description;
+
+    /** 规则内容 */
+    @TableField(value = "rule", typeHandler = BillingRuleConverter.class)
+    private BaseRule rule;
+
     public String getId() {
         return id;
     }
@@ -57,21 +60,5 @@ public class RuleDTO {
 
     public void setRule(BaseRule rule) {
         this.rule = rule;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 } 

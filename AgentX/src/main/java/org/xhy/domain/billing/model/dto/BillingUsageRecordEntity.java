@@ -9,7 +9,6 @@ import org.xhy.infrastructure.entity.BaseEntity;
 import java.math.BigDecimal;
 
 /**
- * XHY
  * 2025/5/17 22:24
  * 账单使用记录实体类
  **/

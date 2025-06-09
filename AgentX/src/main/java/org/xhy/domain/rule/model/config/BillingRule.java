@@ -1,4 +1,4 @@
-package org.xhy.domain.billing.model.config;
+package org.xhy.domain.rule.model.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
