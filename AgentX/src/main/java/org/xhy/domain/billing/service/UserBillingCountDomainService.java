@@ -4,10 +4,14 @@ import org.springframework.stereotype.Service;
 import org.xhy.domain.billing.model.dto.UserBillingCountEntity;
 import org.xhy.domain.billing.repository.UserBillingCountRepository;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.xhy.infrastructure.exception.BusinessException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * 用户计费统计领域服务
+ */
 @Service
 public class UserBillingCountDomainService {
     
@@ -18,14 +22,19 @@ public class UserBillingCountDomainService {
     }
 
     /**
-     * 查询用户账户余额
+     * 获取用户余额
      * @param userId 用户ID
-     * @return 用户账单统计实体
+     * @return 用户余额信息
+     * @throws BusinessException 用户余额记录不存在时抛出异常
      */
     public UserBillingCountEntity getBalance(String userId) {
         LambdaQueryWrapper<UserBillingCountEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(UserBillingCountEntity::getUserId, userId);
-        return billingCountRepository.selectOne(wrapper);
+        UserBillingCountEntity balance = billingCountRepository.selectOne(wrapper);
+        if (balance == null) {
+            throw new BusinessException("用户余额记录不存在: " + userId);
+        }
+        return balance;
     }
 
     /**

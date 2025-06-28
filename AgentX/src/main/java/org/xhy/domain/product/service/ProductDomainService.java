@@ -1,11 +1,13 @@
 package org.xhy.domain.product.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.xhy.domain.product.model.dto.ProductEntity;
 import org.xhy.domain.product.repository.ProductRepository;
+import org.xhy.infrastructure.exception.BusinessException;
 
 /**
  * 产品领域服务
@@ -22,9 +24,14 @@ public class ProductDomainService {
      * 获取产品信息
      * @param id 产品ID
      * @return 产品信息
+     * @throws BusinessException 产品不存在时抛出异常
      */
     public ProductEntity getProduct(String id) {
-        return productRepository.selectById(id);
+        ProductEntity product = productRepository.selectById(id);
+        if (product == null) {
+            throw new BusinessException( "产品不存在: " + id);
+        }
+        return product;
     }
 
     /**
@@ -32,7 +39,7 @@ public class ProductDomainService {
      * @param product
      */
     public void createProduct(ProductEntity product) {
-        productRepository.insert(product);
+        productRepository.checkInsert(product);
     }
 
     /**
@@ -40,7 +47,9 @@ public class ProductDomainService {
      * @param id
      */
     public void deleteProduct(String id) {
-        productRepository.deleteById(id);
+        LambdaQueryWrapper<ProductEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ProductEntity::getId, id);
+        productRepository.checkedDelete(wrapper);
     }
 
     /**
@@ -51,10 +60,10 @@ public class ProductDomainService {
     public void updateProductRuleId(String productId, String ruleId) {
         ProductEntity product = getProduct(productId);
         if (product == null) {
-            throw new IllegalArgumentException("产品不存在");
+            throw new BusinessException("产品不存在:" + productId);
         }
         product.setRuleId(ruleId);
-        productRepository.updateById(product);
+        productRepository.checkedUpdateById(product);
     }
 
     /**
@@ -62,10 +71,10 @@ public class ProductDomainService {
      * @param product
      */
     public void updateProduct(ProductEntity product) {
-        productRepository.updateById(product);
+        productRepository.checkedUpdateById(product);
     }
 
-    /**
+    /**w
      * 查询产品列表
      * @param page 分页参数
      * @return 产品列表

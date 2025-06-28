@@ -35,7 +35,8 @@ public class BillingController {
      */
     @PostMapping("/records")
     public Result<Page<BillingRecordDTO>> queryRecords(@RequestBody Page<BillingUsageRecordEntity> page) {
-        Page<BillingRecordDTO> result = billingRecordAppService.queryRecords(page);
+        String userId = UserContext.getCurrentUserId();
+        Page<BillingRecordDTO> result = billingRecordAppService.queryRecords(page,userId);
         return Result.success(result);
     }
 

@@ -2,9 +2,13 @@ package org.xhy.interfaces.api.portal.rule;
 
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.xhy.application.rule.dto.RuleAggregateDTO;
+import org.xhy.application.rule.dto.RuleVersionDTO;
 import org.xhy.application.rule.service.RuleAppService;
 import org.xhy.interfaces.api.common.Result;
 import org.xhy.interfaces.dto.billing.CreateRuleRequest;
+
+import java.util.List;
 
 /**
  * 规则模块管理
@@ -42,7 +46,7 @@ public class RuleController {
     }
 
     /**
-     * 删除规则
+     * 删除规则(产品相关）
      * @param id 规则ID
      * @param productId 产品ID
      * @return 删除结果
@@ -52,4 +56,17 @@ public class RuleController {
         ruleAppService.deleteRule(id, productId);
         return Result.success();
     }
+
+    /**
+     * 获取规则聚合根信息
+     * @param id 规则ID
+     * @return 规则聚合根信息
+     */
+    @GetMapping("/rules/{id}")
+    public Result getRuleAggregate(@PathVariable String id) {
+        RuleAggregateDTO aggregate = ruleAppService.getRuleAggregate(id);
+        return Result.success(aggregate);
+    }
+
+
 }
