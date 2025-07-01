@@ -12,7 +12,7 @@
 //import org.xhy.domain.rule.service.RuleDomainService;
 //import org.xhy.domain.user.model.UserEntity;
 //import org.xhy.domain.user.service.UserDomainService;
-//import org.xhy.interfaces.dto.billing.CreateRuleRequest;
+//import org.xhy.interfaces.dto.rule.CreateRuleRequest;
 //
 //import java.time.LocalDateTime;
 //import java.util.List;

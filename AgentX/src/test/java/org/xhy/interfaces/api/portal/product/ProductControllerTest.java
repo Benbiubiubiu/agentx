@@ -11,6 +11,7 @@ import org.xhy.application.product.service.ProductAppService;
 import org.xhy.domain.product.model.dto.ProductEntity;
 import org.xhy.interfaces.api.common.Result;
 import org.xhy.interfaces.dto.product.CreateProductRequest;
+import org.xhy.interfaces.dto.product.UpdateProductRequest;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -78,11 +79,11 @@ class ProductControllerTest {
     void updateProduct_ShouldReturnSuccess() {
         // 准备测试数据
         String productId = UUID.randomUUID().toString();
-        CreateProductRequest request = new CreateProductRequest();
+        UpdateProductRequest request = new UpdateProductRequest();
         request.setProductName("更新产品");
         request.setProductType("TEST");
         request.setDescription("更新产品描述");
-        request.setRuleId(UUID.randomUUID().toString());
+
 
         // 执行测试
         Result result = productController.updateProduct(productId, request);
@@ -90,7 +91,7 @@ class ProductControllerTest {
         // 验证结果
         assertNotNull(result);
         assertEquals(200, result.getCode());
-        verify(productAppService).updateProduct(eq(productId), any(CreateProductRequest.class));
+        verify(productAppService).updateProduct(eq(productId), any(UpdateProductRequest.class));
     }
 
     private ProductListDTO createTestProductDTO(String name, String type, String description) {

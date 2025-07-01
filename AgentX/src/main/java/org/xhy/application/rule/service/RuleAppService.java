@@ -18,10 +18,9 @@ import org.xhy.domain.rule.model.dto.RuleEntity;
 import org.xhy.domain.rule.model.dto.RuleVersionEntity;
 import org.xhy.domain.rule.service.RuleDomainService;
 import org.xhy.domain.rule.service.RuleVersionDomainService;
-import org.xhy.interfaces.dto.billing.CreateRuleRequest;
+import org.xhy.interfaces.dto.rule.CreateRuleRequest;
 import org.xhy.domain.product.service.ProductDomainService;
 import org.xhy.infrastructure.exception.BusinessException;
-import org.xhy.infrastructure.exception.ParamValidationException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -217,12 +216,11 @@ public class RuleAppService {
      * @param productId 产品ID
      */
     @Transactional
-    public void deleteRule(String ruleId, String productId) {
+    public void deleteRuleWithProductUnbind(String ruleId, String productId) {
         // 删除规则
         ruleDomainService.deleteRule(ruleId);
         // 删除规则版本
         ruleVersionDomainService.deleteRuleVersionByRuleId(ruleId);
-
         // 清除产品表中的rule_id字段
         if (productId != null && !productId.isEmpty()) {
             productDomainService.updateProductRuleId(productId, null);
@@ -234,7 +232,7 @@ public class RuleAppService {
      * @param ruleId
      */
     @Transactional
-    public void deleteRule(String ruleId){
+    public void deleteRuleOnly(String ruleId){
         // 删除规则
         ruleDomainService.deleteRule(ruleId);
         // 删除规则版本

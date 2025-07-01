@@ -4,6 +4,7 @@ import org.springframework.beans.BeanUtils;
 import org.xhy.application.product.dto.ProductListDTO;
 import org.xhy.domain.product.model.dto.ProductEntity;
 import org.xhy.interfaces.dto.product.CreateProductRequest;
+import org.xhy.interfaces.dto.product.UpdateProductRequest;
 
 /**
  * 产品对象转换器
@@ -19,6 +20,17 @@ public class ProductAssembler {
         ProductEntity entity = new ProductEntity();
         BeanUtils.copyProperties(request, entity);
         entity.setEnabled(true);
+        return entity;
+    }
+
+    /**
+     * 将更新产品请求转换为产品实体
+     * @param request 更新产品请求
+     * @return 产品实体
+     */
+    public static ProductEntity toEntity(UpdateProductRequest request) {
+        ProductEntity entity = new ProductEntity();
+        BeanUtils.copyProperties(request, entity);
         return entity;
     }
 

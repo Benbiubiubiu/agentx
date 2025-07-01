@@ -6,9 +6,8 @@ import org.xhy.application.rule.dto.RuleVersionDTO;
 import org.xhy.application.rule.dto.RuleAggregateDTO;
 import org.xhy.domain.rule.model.dto.RuleEntity;
 import org.xhy.domain.rule.model.dto.RuleVersionEntity;
-import org.xhy.interfaces.dto.billing.CreateRuleRequest;
+import org.xhy.interfaces.dto.rule.CreateRuleRequest;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;

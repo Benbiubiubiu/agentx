@@ -1,128 +1,177 @@
 package org.xhy.application.billing.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
-import org.xhy.application.billing.dto.BillingRecordDTO;
-import org.xhy.application.product.dto.ProductListDTO;
-import org.xhy.domain.billing.model.dto.BillingUsageRecordEntity;
-import org.xhy.domain.product.model.dto.ProductEntity;
-import org.xhy.domain.rule.model.config.BillingRule;
-import org.xhy.interfaces.dto.billing.CreateRuleRequest;
-import org.xhy.domain.rule.constant.RuleType;
-import org.xhy.application.rule.service.RuleAppService;
-import org.xhy.application.product.service.ProductAppService;
-import org.xhy.interfaces.dto.product.CreateProductRequest;
-import org.xhy.domain.rule.model.dto.RuleEntity;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.xhy.application.billing.dto.BillingStatisticsDTO;
+import org.xhy.domain.billing.model.dto.BillingStatistics;
+import org.xhy.domain.billing.service.BillingRecordDomainService;
+import org.xhy.interfaces.dto.billing.GetBillingStatisticsRequest;
+import org.xhy.infrastructure.exception.BusinessException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest
+/**
+ * 账单记录应用服务测试
+ */
+@ExtendWith(MockitoExtension.class)
 class BillingRecordAppServiceTest {
 
-    @Autowired
+    @Mock
+    private BillingRecordDomainService billingRecordDomainService;
+
+    @InjectMocks
     private BillingRecordAppService billingRecordAppService;
 
-    @Autowired
-    private ProductAppService productAppService;
-
-    @Autowired
-    private RuleAppService ruleAppService;
-
-    private static final String USER_ID = UUID.randomUUID().toString();
-    private String productId;
-    private String ruleId;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+    private GetBillingStatisticsRequest request;
 
     @BeforeEach
     void setUp() {
-        // 创建测试用的产品
-        CreateProductRequest request = new CreateProductRequest();
-        request.setProductName("测试产品222");
-        request.setProductType("CHAT");
-        productAppService.createProduct(request, USER_ID);
+        startTime = LocalDateTime.now().minusDays(30);
+        endTime = LocalDateTime.now();
+        request = new GetBillingStatisticsRequest(startTime, endTime);
+    }
 
-        // 通过产品名称查询获取实际创建的产品ID
-        Page<ProductEntity> page = new Page<>(1, 10);
-        Page<ProductListDTO> products = productAppService.queryProducts(page);
-        ProductListDTO product = products.getRecords().stream()
-            .filter(p -> "测试产品222".equals(p.getProductName()))
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("未找到创建的产品"));
-        productId = product.getId();
-
-        // 创建测试用的规则
-        CreateRuleRequest ruleRequest = new CreateRuleRequest();
-        ruleRequest.setVersion("1.0");
-        ruleRequest.setDescription("测试规则");
-        ruleRequest.setRelatedType(RuleType.PRODUCT);
-        ruleRequest.setRelatedId(productId);
-        ruleRequest.setEffectiveAt(LocalDateTime.now());
-        ruleRequest.setExpiredAt(LocalDateTime.now().plusMonths(1));
-
-        // 设置计费规则
-        BillingRule billingRule = new BillingRule();
-        billingRule.setInputToken(0.004);
-        billingRule.setOutputToken(0.007);
-        ruleRequest.setRule(billingRule);
-
-        // 创建规则并获取返回的规则实体
-        RuleEntity ruleEntity = ruleAppService.createRule(ruleRequest);
-        assertNotNull(ruleEntity);
-        ruleId = ruleEntity.getId();
-        
-        // 获取规则版本ID
-        String ruleVersionId = ruleAppService.getCurrentRuleVersion(ruleId).getId();
-
-        // 创建测试用的计费记录
-        billingRecordAppService.createRecord(
-            USER_ID,
-            productId,
-            ruleVersionId,  // 使用规则版本ID
-            new BigDecimal("100.0000"),
-            new BigDecimal("80.0000")
+    @Test
+    void testGetBillingStatistics_Success() {
+        // Arrange
+        String userId = "test-user-id";
+        BillingStatistics mockStatistics = new BillingStatistics(
+            BigDecimal.valueOf(100.50),
+            BigDecimal.valueOf(50.25),
+            BigDecimal.valueOf(10.00),
+            10L,
+            5L,
+            1L,
+            BigDecimal.valueOf(10.05),
+            BigDecimal.valueOf(20.00),
+            BigDecimal.valueOf(5.00),
+            startTime,
+            endTime
         );
+
+        when(billingRecordDomainService.getBillingStatistics(
+            eq(userId), 
+            eq(startTime), 
+            eq(endTime), 
+            isNull(), 
+            isNull()
+        )).thenReturn(mockStatistics);
+
+        // Act
+        BillingStatisticsDTO result = billingRecordAppService.getBillingStatistics(userId, request);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(BigDecimal.valueOf(100.50), result.getTotalAmount());
+        assertEquals(BigDecimal.valueOf(50.25), result.getMonthlyAmount());
+        assertEquals(BigDecimal.valueOf(10.00), result.getTodayAmount());
+        assertEquals(10L, result.getTotalCount());
+        assertEquals(5L, result.getMonthlyCount());
+        assertEquals(1L, result.getTodayCount());
+        assertEquals(BigDecimal.valueOf(10.05), result.getAverageAmount());
+        assertEquals(BigDecimal.valueOf(20.00), result.getMaxAmount());
+        assertEquals(BigDecimal.valueOf(5.00), result.getMinAmount());
     }
 
     @Test
-    void testQueryRecords() {
-        // 准备测试数据
-        Page<BillingUsageRecordEntity> page = new Page<>(1, 10);
+    void testGetBillingStatistics_WithProductId() {
+        // Arrange
+        String userId = "test-user-id";
+        String productId = "test-product-id";
+        request.setProductId(productId);
 
-        // 执行测试
-        Page<BillingRecordDTO> result = billingRecordAppService.queryRecords(page, USER_ID);
+        BillingStatistics mockStatistics = new BillingStatistics(
+            BigDecimal.valueOf(50.00),
+            BigDecimal.valueOf(25.00),
+            BigDecimal.valueOf(5.00),
+            5L,
+            3L,
+            1L,
+            BigDecimal.valueOf(10.00),
+            BigDecimal.valueOf(15.00),
+            BigDecimal.valueOf(5.00),
+            startTime,
+            endTime
+        );
 
-        // 验证结果
+        when(billingRecordDomainService.getBillingStatistics(
+            eq(userId), 
+            eq(startTime), 
+            eq(endTime), 
+            eq(productId), 
+            isNull()
+        )).thenReturn(mockStatistics);
+
+        // Act
+        BillingStatisticsDTO result = billingRecordAppService.getBillingStatistics(userId, request);
+
+        // Assert
         assertNotNull(result);
-        assertFalse(result.getRecords().isEmpty());
-
-        BillingRecordDTO record = result.getRecords().get(0);
-        assertEquals(USER_ID, record.getUserId());
-        assertEquals(productId, record.getProductId());
-        String expectedRuleVersionId = ruleAppService.getCurrentRuleVersion(ruleId).getId();
-        assertEquals(expectedRuleVersionId, record.getRuleVersionId());
-        assertEquals(new BigDecimal("100.0000"), record.getTotalAmount());
-        assertEquals(new BigDecimal("80.0000"), record.getAmountLeft());
+        assertEquals(BigDecimal.valueOf(50.00), result.getTotalAmount());
+        assertEquals(5L, result.getTotalCount());
     }
 
     @Test
-    void testQueryRecordsWithNoData() {
-        // 准备测试数据
-        Page<BillingUsageRecordEntity> page = new Page<>(1, 10);
-        String nonExistentUserId = UUID.randomUUID().toString();
+    void testGetBillingStatistics_InvalidTimeRange() {
+        // Arrange
+        String userId = "test-user-id";
+        request.setStartTime(endTime);
+        request.setEndTime(startTime);
 
-        // 执行测试
-        Page<BillingRecordDTO> result = billingRecordAppService.queryRecords(page, nonExistentUserId);
-
-        // 验证结果
-        assertNotNull(result);
-        assertTrue(result.getRecords().isEmpty());
-        assertEquals(0, result.getTotal());
+        // Act & Assert
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            billingRecordAppService.getBillingStatistics(userId, request);
+        });
+        assertEquals("开始时间不能晚于结束时间", exception.getMessage());
     }
-}
+
+    @Test
+    void testGetBillingStatistics_TimeRangeTooLong() {
+        // Arrange
+        String userId = "test-user-id";
+        request.setStartTime(LocalDateTime.now().minusYears(2));
+
+        // Act & Assert
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            billingRecordAppService.getBillingStatistics(userId, request);
+        });
+        assertEquals("查询时间范围不能超过一年", exception.getMessage());
+    }
+
+    @Test
+    void testGetBillingStatistics_NullStartTime() {
+        // Arrange
+        String userId = "test-user-id";
+        request.setStartTime(null);
+
+        // Act & Assert
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            billingRecordAppService.getBillingStatistics(userId, request);
+        });
+        assertEquals("开始时间和结束时间不能为空", exception.getMessage());
+    }
+
+    @Test
+    void testGetBillingStatistics_NullEndTime() {
+        // Arrange
+        String userId = "test-user-id";
+        request.setEndTime(null);
+
+        // Act & Assert
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            billingRecordAppService.getBillingStatistics(userId, request);
+        });
+        assertEquals("开始时间和结束时间不能为空", exception.getMessage());
+    }
+} 

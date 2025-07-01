@@ -9,6 +9,7 @@ import org.xhy.domain.product.model.dto.ProductEntity;
 import org.xhy.infrastructure.auth.UserContext;
 import org.xhy.interfaces.api.common.Result;
 import org.xhy.interfaces.dto.product.CreateProductRequest;
+import org.xhy.interfaces.dto.product.UpdateProductRequest;
 
 /**
  * 产品模块管理
@@ -52,7 +53,7 @@ public class ProductController {
      * @return 更新结果
      */
     @PutMapping("/{id}")
-    public Result updateProduct(@PathVariable String id, @Validated @RequestBody CreateProductRequest request) {
+    public Result updateProduct(@PathVariable String id, @Validated @RequestBody UpdateProductRequest request) {
         productAppService.updateProduct(id, request);
         return Result.success();
     }

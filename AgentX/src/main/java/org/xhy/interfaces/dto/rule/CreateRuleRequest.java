@@ -1,4 +1,4 @@
-package org.xhy.interfaces.dto.billing;
+package org.xhy.interfaces.dto.rule;
 
 import org.xhy.domain.rule.constant.RuleType;
 import org.xhy.domain.rule.model.config.BaseRule;

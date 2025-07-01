@@ -8,13 +8,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.xhy.application.billing.assembler.BillingRecordAssembler;
 import org.xhy.application.billing.dto.BillingRecordDTO;
-import org.xhy.application.tool.service.ToolAppService;
+import org.xhy.application.billing.dto.CreateBillingRecordRequest;
+import org.xhy.application.billing.dto.BillingStatisticsDTO;
 import org.xhy.domain.billing.model.dto.BillingUsageRecordEntity;
+import org.xhy.domain.billing.model.dto.BillingStatistics;
 import org.xhy.domain.billing.service.BillingRecordDomainService;
 import org.xhy.domain.rule.model.dto.RuleVersionEntity;
 import org.xhy.domain.rule.service.RuleVersionDomainService;
+import org.xhy.infrastructure.exception.BusinessException;
+import org.xhy.interfaces.dto.billing.GetBillingStatisticsRequest;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 /**
@@ -32,11 +37,9 @@ public class BillingRecordAppService {
     private static final Logger logger = LoggerFactory.getLogger(BillingRecordAppService.class);
 
     private final BillingRecordDomainService billingRecordDomainService;
-    private final RuleVersionDomainService ruleVersionDomainService;
 
-    public BillingRecordAppService(BillingRecordDomainService billingRecordDomainService, RuleVersionDomainService ruleVersionDomainService) {
+    public BillingRecordAppService(BillingRecordDomainService billingRecordDomainService) {
         this.billingRecordDomainService = billingRecordDomainService;
-        this.ruleVersionDomainService = ruleVersionDomainService;
     }
 
     /**
@@ -58,39 +61,46 @@ public class BillingRecordAppService {
     }
 
     /**
-     * 创建账单记录
+     * 获取账单统计信息
      * @param userId 用户ID
-     * @param productId 产品ID
-     * @param ruleVersionId 规则版本ID
-     * @param totalAmount 总金额
-     * @param amountLeft 剩余金额
-     * @return 创建的账单记录
+     * @param request 统计请求
+     * @return 账单统计信息
      */
-    public BillingRecordDTO createRecord(
-            String userId,
-            String productId,
-            String ruleVersionId,
-            BigDecimal totalAmount,
-            BigDecimal amountLeft) {
+    @Transactional(readOnly = true)
+    public BillingStatisticsDTO getBillingStatistics(String userId, GetBillingStatisticsRequest request) {
+        // 1. 参数验证
+        validateStatisticsRequest(request);
+        
+        // 2. 调用领域服务获取统计信息
+        BillingStatistics statistics = billingRecordDomainService.getBillingStatistics(
+            userId, 
+            request.getStartTime(), 
+            request.getEndTime(),
+            request.getProductId(),
+            request.getRuleVersionId()
+        );
+        
+        // 3. 转换为DTO
+        return BillingRecordAssembler.toStatisticsDTO(statistics);
+    }
 
-        RuleVersionEntity ruleVersion = ruleVersionDomainService.getRuleVersion(ruleVersionId);
-        if (ruleVersion == null) {
-            logger.error("规则版本不存在，ruleVersionId: {}", ruleVersionId);
-            throw new IllegalArgumentException("规则版本不存在");
+    /**
+     * 验证统计请求参数
+     * @param request 统计请求
+     */
+    private void validateStatisticsRequest(GetBillingStatisticsRequest request) {
+        if (request.getStartTime() == null || request.getEndTime() == null) {
+            throw new BusinessException("开始时间和结束时间不能为空");
         }
-        System.out.println("rule_version entity:"+ JSON.toJSONString(ruleVersion));
-        // 生成价格规则文本
-        String priceRuleText = billingRecordDomainService.generatePriceRuleText(ruleVersion.getRule());
-
-        BillingUsageRecordEntity record = new BillingUsageRecordEntity();
-        record.setUserId(userId);
-        record.setProductId(productId);
-        record.setRuleVersionId(ruleVersionId);
-        record.setPriceRule(priceRuleText);
-        record.setTotalAmount(totalAmount);
-        record.setAmountLeft(amountLeft);
-        billingRecordDomainService.createRecord(record);
-        // 转换为DTO
-        return BillingRecordAssembler.toDTO(record);
+        
+        if (request.getStartTime().isAfter(request.getEndTime())) {
+            throw new BusinessException("开始时间不能晚于结束时间");
+        }
+        
+        // 限制查询时间范围，防止查询时间过长
+        LocalDateTime maxStartTime = LocalDateTime.now().minusYears(1);
+        if (request.getStartTime().isBefore(maxStartTime)) {
+            throw new BusinessException("查询时间范围不能超过一年");
+        }
     }
 } 

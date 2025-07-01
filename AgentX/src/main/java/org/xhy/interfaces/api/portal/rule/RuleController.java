@@ -3,12 +3,9 @@ package org.xhy.interfaces.api.portal.rule;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.xhy.application.rule.dto.RuleAggregateDTO;
-import org.xhy.application.rule.dto.RuleVersionDTO;
 import org.xhy.application.rule.service.RuleAppService;
 import org.xhy.interfaces.api.common.Result;
-import org.xhy.interfaces.dto.billing.CreateRuleRequest;
-
-import java.util.List;
+import org.xhy.interfaces.dto.rule.CreateRuleRequest;
 
 /**
  * 规则模块管理
@@ -53,7 +50,7 @@ public class RuleController {
      */
     @DeleteMapping("/rules/{id}")
     public Result deleteRule(@PathVariable String id, @RequestParam String productId) {
-        ruleAppService.deleteRule(id, productId);
+        ruleAppService.deleteRuleWithProductUnbind(id, productId);
         return Result.success();
     }
 

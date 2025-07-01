@@ -9,11 +9,9 @@ import org.xhy.application.rule.dto.RuleDTO;
 import org.xhy.domain.rule.constant.RuleType;
 import org.xhy.domain.product.model.dto.ProductEntity;
 import org.xhy.domain.product.service.ProductDomainService;
-import org.xhy.interfaces.dto.billing.CreateRuleRequest;
+import org.xhy.interfaces.dto.rule.CreateRuleRequest;
 import org.xhy.domain.rule.model.config.BillingRule;
-import org.xhy.domain.rule.model.dto.RuleVersionEntity;
 import org.xhy.domain.rule.model.dto.RuleEntity;
-import java.util.List;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -221,7 +219,7 @@ class RuleAppServiceTest {
         assertNotNull(ruleEntity);
 
         // 执行测试
-        ruleAppService.deleteRule(ruleEntity.getId(), TEST_PRODUCT_ID);
+        ruleAppService.deleteRuleWithProductUnbind(ruleEntity.getId(), TEST_PRODUCT_ID);
 
         // 验证结果
         RuleDTO deletedRule = ruleAppService.getRule(ruleEntity.getId());

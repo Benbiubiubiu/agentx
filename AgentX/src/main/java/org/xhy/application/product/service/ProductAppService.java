@@ -10,6 +10,7 @@ import org.xhy.domain.product.service.ProductDomainService;
 import org.xhy.domain.rule.service.RuleDomainService;
 import org.xhy.domain.rule.service.RuleVersionDomainService;
 import org.xhy.interfaces.dto.product.CreateProductRequest;
+import org.xhy.interfaces.dto.product.UpdateProductRequest;
 
 import java.util.stream.Collectors;
 
@@ -63,7 +64,7 @@ public class ProductAppService {
      * @param request 更新产品请求
      */
     @Transactional
-    public void updateProduct(String id, CreateProductRequest request) {
+    public void updateProduct(String id, UpdateProductRequest request) {
         ProductEntity entity = ProductAssembler.toEntity(request);
         entity.setId(id);
         productDomainService.updateProduct(entity);

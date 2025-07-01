@@ -2,7 +2,7 @@ package org.xhy.application.billing.assembler;
 
 import org.springframework.beans.BeanUtils;
 import org.xhy.domain.rule.model.dto.RuleVersionEntity;
-import org.xhy.interfaces.dto.billing.CreateRuleRequest;
+import org.xhy.interfaces.dto.rule.CreateRuleRequest;
 
 import java.time.LocalDateTime;
 
